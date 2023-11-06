@@ -22,7 +22,7 @@ class BarcodeScanner:
         self.pixelHeight = pixelHeight
         self.scanArea = scanArea
 
-    def lookupUPC(upc):
+    def lookupUPC(self, upc):
         url = "https://api.upcitemdb.com/prod/trial/lookup?upc=%s" % (upc)
         response = requests.get(url)
         response.raise_for_status()  # check for errors
