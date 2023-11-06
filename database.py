@@ -1,0 +1,89 @@
+import mysql.connector
+from mysql.connector import errorcode
+import logging
+import time
+
+
+class Database:
+    def __init__(
+        self,
+        host="sliver.local",
+        user="rpiScanner",
+        password="scannerUserPassword",
+        database_name="",
+        logger_name="",
+    ) -> None:
+        self.config = {
+            "user": user,
+            "password": password,
+            "host": host,
+            "database": database_name,
+            "raise_on_warnings": True,
+        }
+
+        if logger_name == "":
+            logger_name = __name__
+        # Set up logger
+        self.logger = logging.getLogger(logger_name)
+        self.logger.setLevel(logging.INFO)
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+        # Log to console
+        handler = logging.StreamHandler()
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
+
+        # Also log to a file
+        file_handler = logging.FileHandler("sql-errors.log")
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(file_handler)
+
+        self.cnx = self.connect(config=self.config)
+
+    def connect(self, config="", attempts=3, delay=2):
+        if config == "":
+            config = self
+        attempt = 1
+        # Implement a reconnection routine
+        while attempt < attempts + 1:
+            try:
+                return mysql.connector.connect(**config)
+            except (mysql.connector.Error, IOError) as err:
+                if attempts is attempt:
+                    # Attempts to reconnect failed; returning None
+                    self.logger.info("Failed to connect, exiting without a connection: %s", err)
+                    return None
+                self.logger.info(
+                    "Connection failed: %s. Retrying (%d/%d)...",
+                    err,
+                    attempt,
+                    attempts - 1,
+                )
+                # progressive reconnect delay
+                time.sleep(delay**attempt)
+                attempt += 1
+        return None
+
+    def disconnect(self):
+        self.cnx.close()
+
+    def insert_bottle(self, table, data):
+        cursor = self.cnx.cursor()
+        add_bottle = (
+            "INSERT INTO ",
+            table,
+            "(upc, title, brand, price, image, link, date) " "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+        )
+
+        cursor.execute(add_bottle, data)
+        self.data
+        self.upc
+        self.title
+        self.brand
+        self.price
+        self.image
+        self.link
+        self.date
+
+    def __del__(self):
+        self.disconnect()

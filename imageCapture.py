@@ -1,0 +1,72 @@
+import time
+import io
+from picamera2 import Picamera2, Preview
+from PIL import Image
+from frame_server import FrameServer
+
+
+class ImageCapture:
+    def __init__(self, pixelWidth=800, pixelHeight=600, video=False) -> None:
+        time.sleep(1)
+        self.stream = io.BytesIO()
+        self.video = video
+        if video:
+            self.picam2 = Picamera2()
+            config = self.picam2.create_preview_configuration(
+                main={"size": (pixelWidth, pixelHeight)},
+                lores={"size": (pixelWidth, pixelHeight)},
+                display="lores",
+            )
+            self.picam2.video_configuration.controls.FrameDurationLimits = (10000, 10000)
+            self.picam2.configure(config)
+        else:
+            self.picam2 = Picamera2()
+            capture_config = self.picam2.create_still_configuration(
+                main={"size": (pixelWidth, pixelHeight)},
+                lores={"size": (pixelWidth, pixelHeight)},
+                display="lores",
+            )
+            self.picam2.configure(capture_config)
+
+        self.picam2.start()
+        time.sleep(2)
+
+        if self.video:
+            self.frame_server = FrameServer(self.picam2)
+            self.frame_server.start()
+        # self.captureImage()
+
+    def captureImage(self):
+        if self.video:
+            buffer = self.frame_server.wait_for_frame()
+            self.last_image = self.picam2.helpers.make_image(
+                buffer, self.picam2.camera_configuration()["main"]
+            )
+        else:
+            request = self.picam2.capture_request()
+            self.last_image = request.make_image("main")  # image from the "main" stream
+            metadata = request.get_metadata()
+            request.release()  # requests must always be returned to libcamera
+            print("frame captured")
+
+        self.last_image = self.last_image.convert("L")
+
+    def getLastImage(self):
+        return self.last_image
+
+    def getNewImage(self):
+        self.captureImage()
+        return self.getLastImage()
+
+    def saveImage(self, filename="debug_image.jpg", image=""):
+        if image == "":
+            self.last_image.save(filename)
+        else:
+            image.save(filename)
+
+    def __del__(self):
+        try:
+            self.frame_server.stop()
+        except AttributeError:
+            pass
+        self.picam2.close()

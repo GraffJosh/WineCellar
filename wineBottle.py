@@ -1,3 +1,6 @@
+from datetime import date
+
+
 class WineBottle:
     def __init__(self, upc="", title="", brand="", price="", image="", link="") -> None:
         self.upc = upc
@@ -6,6 +9,8 @@ class WineBottle:
         self.price = price
         self.image = image
         self.link = link
+        self.data = ""
+        self.date = date.today()
         print("init winebottle, title: ", self.title)
 
     def __init__(self, jsonPackage="") -> None:
@@ -16,4 +21,10 @@ class WineBottle:
         self.price = self.data["offers"][0]["price"]
         self.image = self.data["images"][0]
         self.link = self.data["offers"][0]["link"]
+        self.date = date.today()
+
+    def print(self):
         print("init winebottle, title: ", self.title)
+
+    def getData(self):
+        return self.__dict__
