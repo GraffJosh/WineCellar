@@ -86,5 +86,32 @@ class Database:
         self.cnx.commit()
         cursor.close()
 
+    def lookupUPC(self, table, upc):
+        cursor = self.cnx.cursor()
+        query = ("SELECT * FROM {} WHERE " "UPC={}").format(table, upc)
+        cursor.execute(query)
+
+        print()
+        print("data: ", cursor)
+        bottles = []
+        for upc, title, brand, price, image, link, date, data in cursor:
+            bottles.append(
+                {
+                    "upc": upc,
+                    "title": title,
+                    "brand": brand,
+                    "price": price,
+                    "image": image,
+                    "link": link,
+                    "date": date,
+                    "data": data,
+                }
+            )
+        if len(bottles) < 1:
+            print("No bottles found!")
+        # commit the changes
+        cursor.close()
+        return bottles
+
     def __del__(self):
         self.disconnect()

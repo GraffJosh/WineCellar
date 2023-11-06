@@ -23,6 +23,16 @@ class WineBottle:
         self.link = self.data["offers"][0]["link"]
         self.date = date.today()
 
+    def __init__(self, inDict={}) -> None:
+        self.data = inDict["data"]
+        self.upc = inDict["upc"]
+        self.title = inDict["title"]
+        self.brand = inDict["brand"]
+        self.price = inDict["price"]
+        self.image = inDict["image"]
+        self.link = inDict["link"]
+        self.date = inDict["date"]
+
     def print(self):
         print("init winebottle, title: ", self.title)
 
