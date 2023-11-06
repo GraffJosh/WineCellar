@@ -1,0 +1,18 @@
+create table bottles (
+    upc varchar(20),
+    title varchar(255),
+    brand varchar(255),
+    price int,
+    image varchar(500),
+    link varchar(500),
+    date DATE,
+    data varchar(750));
+insert into bottles VALUES(
+    '1234',
+    'jpgTest1',
+    'JPGIndustries',
+    '5',
+    'imagelink.com',
+    'productlink.com',
+    '2023-11-06 17:12:00',
+    'this is data garbage for testing');

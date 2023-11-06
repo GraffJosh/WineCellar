@@ -1,8 +1,6 @@
-
 import wineBottle
-import barcodeScanner
+import barcodeScanner as barcodeScanner
 import database
-
 
 
 cellarDB = database.Database(database_name="wine_list")
@@ -20,7 +18,5 @@ for bottle in last_bottles:
     print(bottle.getData())
     cellarDB.insert_bottle("bottles", bottle.getData())
 
-upc = 852848000007
-wineBottle = wineBottle.WineBottle(jsonPackage=scanner.lookupUPC(upc))
 
 # print(mydb)

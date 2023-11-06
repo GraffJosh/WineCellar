@@ -27,4 +27,13 @@ class WineBottle:
         print("init winebottle, title: ", self.title)
 
     def getData(self):
-        return self.__dict__
+        return {
+            "upc": str(self.upc),
+            "title": str(self.title),
+            "brand": str(self.brand),
+            "price": str(self.price),
+            "image": str(self.image),
+            "link": str(self.link),
+            "date": str(self.date),
+            "data": str(self.data),
+        }

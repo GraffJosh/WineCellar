@@ -70,20 +70,21 @@ class Database:
     def insert_bottle(self, table, data):
         cursor = self.cnx.cursor()
         add_bottle = (
-            "INSERT INTO ",
-            table,
-            "(upc, title, brand, price, image, link, date) " "VALUES (%s, %s, %s, %s, %s, %s, %s)",
-        )
+            "INSERT IGNORE INTO {} "
+            "(upc, title, brand, price, image, link, date) "
+            "VALUES (%(upc)s, %(title)s,%(brand)s,%(price)s,%(image)s,%(link)s,%(date)s)"
+        ).format(table)
+        print()
+        print("data: ", data)
+        print()
+        try:
+            cursor.execute(add_bottle, data)
+        except mysql.connector.errors.DatabaseError:
+            print("You've already added this bottle!")
 
-        cursor.execute(add_bottle, data)
-        self.data
-        self.upc
-        self.title
-        self.brand
-        self.price
-        self.image
-        self.link
-        self.date
+        # commit the changes
+        self.cnx.commit()
+        cursor.close()
 
     def __del__(self):
         self.disconnect()
