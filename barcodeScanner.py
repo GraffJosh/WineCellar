@@ -1,6 +1,5 @@
 import io
 import time
-import json, requests
 import imageCapture
 from PIL import Image, ImageDraw, ImageFont
 import zbar
@@ -21,15 +20,6 @@ class BarcodeScanner:
         self.pixelWidth = pixelWidth
         self.pixelHeight = pixelHeight
         self.scanArea = scanArea
-
-    def lookupUPC(self, upc):
-        url = "https://api.upcitemdb.com/prod/trial/lookup?upc=%s" % (upc)
-        response = requests.get(url)
-        response.raise_for_status()  # check for errors
-
-        # Load JSON data into a Python variable.
-        jsonData = json.loads(response.text)
-        return jsonData
 
     def getCode(self):
         decoded_barcodes = []
