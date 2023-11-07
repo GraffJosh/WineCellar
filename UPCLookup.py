@@ -14,11 +14,9 @@ if len(last_codes) > 0:
         db_entries = cellarDB.lookupUPC(table="bottles", upc=code)
         if len(db_entries) > 0:
             for db_entry in db_entries:
-                last_bottles.append(wineBottle.WineBottle(inDict=db_entry, new=False))
+                last_bottles.append(wineBottle.WineBottle(inDict=db_entry))
         else:
-            last_bottles.append(
-                wineBottle.WineBottle(inJsonPackage=wineBottle.lookupUPC(code), new=True)
-            )
+            print("bottle not found by DB")
 else:
     print("No barcodes detected")
 

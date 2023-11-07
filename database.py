@@ -1,7 +1,9 @@
 import mysql.connector
 from mysql.connector import errorcode
+import json, requests
 import logging
 import time
+from datetime import date
 
 
 class Database:
@@ -105,10 +107,38 @@ class Database:
                     "link": link,
                     "date": date,
                     "data": data,
+                    "new": False,
                 }
             )
         if len(bottles) < 1:
-            print("No bottles found!")
+            print("Bottle not found in Database!")
+            url = "https://api.upcitemdb.com/prod/trial/lookup?upc=%s" % (upc)
+            response = requests.get(url)
+            response.raise_for_status()  # check for errors
+
+            # Load JSON data into a Python variable.
+            jsonData = json.loads(response.text)
+            data = jsonData["items"][0]
+            upc = data["upc"]
+            title = data["title"]
+            brand = data["brand"]
+            price = data["offers"][0]["price"]
+            image = data["images"][0]
+            link = data["offers"][0]["link"]
+            bottles.append(
+                {
+                    "upc": upc,
+                    "title": title,
+                    "brand": brand,
+                    "price": price,
+                    "image": image,
+                    "link": link,
+                    "date": date.today(),
+                    "data": data,
+                    "new": True,
+                }
+            )
+
         # commit the changes
         cursor.close()
         return bottles

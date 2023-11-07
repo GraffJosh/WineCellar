@@ -2,7 +2,7 @@ from datetime import date
 
 
 class WineBottle:
-    def __init__(self, upc="", title="", brand="", price="", image="", link="") -> None:
+    def __init__(self, upc="", title="", brand="", price="", image="", link="", new=None) -> None:
         self.upc = upc
         self.title = title
         self.brand = brand
@@ -10,20 +10,22 @@ class WineBottle:
         self.image = image
         self.link = link
         self.data = ""
+        self.new = new
         self.date = date.today()
         print("init winebottle, title: ", self.title)
 
-    def __init__(self, jsonPackage="") -> None:
-        self.data = jsonPackage["items"][0]
-        self.upc = self.data["upc"]
-        self.title = self.data["title"]
-        self.brand = self.data["brand"]
-        self.price = self.data["offers"][0]["price"]
-        self.image = self.data["images"][0]
-        self.link = self.data["offers"][0]["link"]
-        self.date = date.today()
+    # def __init__(self, inJsonPackage="", new=None) -> None:
+    #     self.data = inJsonPackage["items"][0]
+    #     self.upc = self.data["upc"]
+    #     self.title = self.data["title"]
+    #     self.brand = self.data["brand"]
+    #     self.price = self.data["offers"][0]["price"]
+    #     self.image = self.data["images"][0]
+    #     self.link = self.data["offers"][0]["link"]
+    #     self.new = new
+    #     self.date = date.today()
 
-    def __init__(self, inDict={}) -> None:
+    def __init__(self, inDict={}, new=None) -> None:
         self.data = inDict["data"]
         self.upc = inDict["upc"]
         self.title = inDict["title"]
@@ -32,9 +34,21 @@ class WineBottle:
         self.image = inDict["image"]
         self.link = inDict["link"]
         self.date = inDict["date"]
+        self.new = inDict["new"]
 
     def print(self):
-        print("init winebottle, title: ", self.title)
+        print()
+        print()
+        print("upc: ", self.upc)
+        print("title: ", self.title)
+        print("brand: ", self.brand)
+        print("price: ", self.price)
+        print("image: ", self.image)
+        print("link: ", self.link)
+        print("date: ", self.date)
+        print("data: ", self.data)
+        print()
+        print()
 
     def getData(self):
         return {
