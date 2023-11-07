@@ -10,7 +10,7 @@ last_bottles = []
 
 if len(last_codes) > 0:
     for code in last_codes:
-        last_bottles.append(wineBottle.WineBottle(scanner.lookupUPC(code)))
+        last_bottles.append(wineBottle.WineBottle(jsonPackage=scanner.lookupUPC(code)))
 else:
     print("No barcodes detected")
 
