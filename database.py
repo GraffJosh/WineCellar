@@ -3,7 +3,7 @@ from mysql.connector import errorcode
 import json, requests
 import logging
 import time
-from datetime import date
+from datetime import date as datettimedate
 
 
 class Database:
@@ -118,32 +118,43 @@ class Database:
 
             # Load JSON data into a Python variable.
             jsonData = json.loads(response.text)
-            try:
+            if jsonData["items"]:
                 data = jsonData["items"][0]
-            except IndexError:
-                print("data incorrect? ")
-                print("JSONRAW: ", jsonData)
-            upc = data["upc"]
-            title = data["title"]
-            brand = data["brand"]
-            price = data["offers"][0]["price"]
-            image = data["images"][0]
-            link = data["offers"][0]["link"]
-            bottles.append(
-                {
-                    "upc": upc,
-                    "title": title,
-                    "brand": brand,
-                    "price": price,
-                    "image": image,
-                    "link": link,
-                    "date": date.today(),
-                    "data": data,
-                    "new": True,
-                }
-            )
+                upc = data["upc"]
+                title = data["title"]
+                brand = data["brand"]
+                price = data["offers"][0]["price"]
+                image = data["images"][0]
+                link = data["offers"][0]["link"]
+                bottles.append(
+                    {
+                        "upc": upc,
+                        "title": title,
+                        "brand": brand,
+                        "price": price,
+                        "image": image,
+                        "link": link,
+                        "date": datettimedate.today(),
+                        "data": data,
+                        "new": True,
+                    }
+                )
+            else:
+                print("bottle not found in online database?!")
+                bottles.append(
+                    {
+                        "upc": upc,
+                        "title": None,
+                        "brand": None,
+                        "price": None,
+                        "image": None,
+                        "link": None,
+                        "date": datettimedate.today(),
+                        "data": None,
+                        "new": True,
+                    }
+                )
 
-        # commit the changes
         cursor.close()
         return bottles
 
