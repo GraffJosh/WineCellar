@@ -12,7 +12,7 @@ upc_codes = []
 if len(last_codes) > 0:
     for code in last_codes:
         db_entries = cellarDB.lookupUPC(table="bottles", upc=code)
-        if db_entries > 0:
+        if len(db_entries) > 0:
             for db_entry in db_entries:
                 last_bottles.append(wineBottle.WineBottle(inDict=db_entry, new=False))
         else:
