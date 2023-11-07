@@ -118,7 +118,11 @@ class Database:
 
             # Load JSON data into a Python variable.
             jsonData = json.loads(response.text)
-            data = jsonData["items"][0]
+            try:
+                data = jsonData["items"][0]
+            except IndexError:
+                print("data incorrect? ")
+                print("JSONRAW: ", jsonData)
             upc = data["upc"]
             title = data["title"]
             brand = data["brand"]
