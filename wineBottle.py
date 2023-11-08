@@ -26,15 +26,18 @@ class WineBottle:
     #     self.date = date.today()
 
     def __init__(self, inDict={}, new=None) -> None:
-        self.data = inDict["data"]
-        self.upc = inDict["upc"]
-        self.title = inDict["title"]
-        self.brand = inDict["brand"]
-        self.price = inDict["price"]
-        self.image = inDict["image"]
-        self.link = inDict["link"]
-        self.date = inDict["date"]
-        self.new = inDict["new"]
+        try:
+            self.upc = inDict["upc"]
+            self.new = inDict["new"]
+            self.data = inDict["data"]
+            self.title = inDict["title"]
+            self.brand = inDict["brand"]
+            self.price = inDict["price"]
+            self.image = inDict["image"]
+            self.link = inDict["link"]
+            self.date = inDict["date"]
+        except KeyError as errortext:
+            print("missing key", errortext)
 
     def print(self):
         print()

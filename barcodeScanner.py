@@ -21,14 +21,16 @@ class BarcodeScanner:
         self.pixelHeight = pixelHeight
         self.scanArea = scanArea
 
-    def getCode(self, timeout=None):
+    def getCode(self, inTimeout=None):
         decoded_barcodes = []
         return_barcodes = []
         i = 0
-        if not timeout:
+        if not inTimeout:
             runningTimeout = self.timeout
+        else:
+            runningTimeout = inTimeout
 
-        while len(decoded_barcodes) < 1 and i < runningTimeout and runningTimeout != -1:
+        while len(decoded_barcodes) < 1 and ((i < runningTimeout) or (runningTimeout == -1)):
             i += 1
             last_image = self.camera.getNewImage()
             crop_dist = (1 - self.scanArea) / 2
@@ -44,7 +46,9 @@ class BarcodeScanner:
                 # print(type(decoded_barcodes[0]))
                 for code in decoded_barcodes:
                     if code.type == "EAN13":
-                        return_barcodes.append(code.data.decode())
+                        print("detected code: ", code.data.decode())
+                        if len(code.data.decode()) >= 12:
+                            return_barcodes.append(code.data.decode())
 
         if i >= runningTimeout and runningTimeout != -1:
             self.camera.saveImage(filename="debug_image.jpg", image=last_image)

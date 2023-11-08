@@ -3,7 +3,7 @@ from mysql.connector import errorcode
 import json, requests
 import logging
 import time
-from datetime import date
+from datetime import date as datettimedate
 
 
 class Database:
