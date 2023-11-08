@@ -16,3 +16,6 @@ insert into bottles VALUES(
     'productlink.com',
     '2023-11-06 17:12:00',
     'this is data garbage for testing');
+select * from bottles where upc='8006297006598';
+
+"WHERE {}=\'{}\'".format(inCol, condition)
