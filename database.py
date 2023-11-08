@@ -14,6 +14,7 @@ class Database:
         password="scannerUserPassword",
         database_name="",
         logger_name="",
+        default_table=None,
     ) -> None:
         self.config = {
             "user": user,
@@ -23,6 +24,7 @@ class Database:
             "raise_on_warnings": True,
         }
 
+        self.default_table = default_table
         if logger_name == "":
             logger_name = __name__
         # Set up logger
@@ -44,7 +46,7 @@ class Database:
 
     def connect(self, config="", attempts=3, delay=2):
         if config == "":
-            config = self
+            config = self.config
         attempt = 1
         # Implement a reconnection routine
         while attempt < attempts + 1:
@@ -69,6 +71,48 @@ class Database:
     def disconnect(self):
         self.cnx.close()
 
+    def get(self, inTable=None, inCol=None, inCondition=None):
+        self.connect()
+        cursor = self.cnx.cursor(buffered=True)
+        commandList = []
+        results = []
+        commandStr = "SELECT * FROM {} ".format(inTable)
+        conditionStr = ""
+        if inCondition:
+            for condition in inCondition:
+                conditionStr = "WHERE {}='{}'".format(inCol, condition)
+                commandList.append(commandStr + conditionStr)
+
+        for command in commandList:
+            print(command)
+            cursor.execute(command)
+            results.append(cursor.fetchone())
+        return results
+        pass
+
+    def put(self, inTable=None, inDict={}):
+        self.connect()
+        if not inTable:
+            inTable = self.default_table
+        commandStr = "INSERT IGNORE INTO {} ".format(inTable)
+        colsStr = "("
+        colsStr = colsStr + ", ".join(list(inDict.keys())) + ") "
+        valsStr = "VALUES ('"
+        valsStr = valsStr + "', '".join(map(str, list(inDict.values()))) + "')"
+
+        cursor = self.cnx.cursor()
+        commandStr = (commandStr + colsStr + valsStr).encode("unicode_escape")
+        print(commandStr)
+        try:
+            cursor.execute(commandStr)
+        except mysql.connector.errors.DatabaseError as errorText:
+            print("You've already added this item! ", errorText)
+
+        # commit the changes
+        self.cnx.commit()
+        cursor.close()
+        pass
+
     def insert_bottle(self, table, data):
         cursor = self.cnx.cursor()
         add_bottle = (
@@ -88,15 +132,24 @@ class Database:
         self.cnx.commit()
         cursor.close()
 
-    def lookupUPC(self, table, upc):
-        cursor = self.cnx.cursor()
-        query = ("SELECT * FROM {} WHERE " "UPC={}").format(table, upc)
-        cursor.execute(query)
+    def searchUPC(self, upc):
+        url = "https://api.upcitemdb.com/prod/trial/lookup?upc=%s" % (upc)
+        response = requests.get(url)
+        response.raise_for_status()  # check for errors
 
-        print()
-        print("data: ", cursor)
+        # Load JSON data into a Python variable.
+        jsonData = json.loads(response.text)
+        try:
+            data = jsonData["items"][0]
+        except IndexError:
+            print("data incorrect? ")
+            print("JSONRAW: ", jsonData)
+        return data
+
+    def lookupUPC(self, inTable, upc):
+        results = self.get(inTable=inTable, inCol="upc", inCondition=[upc])
         bottles = []
-        for upc, title, brand, price, image, link, date, data in cursor:
+        for upc, title, brand, price, image, link, date, data in results:
             bottles.append(
                 {
                     "upc": upc,
@@ -112,39 +165,37 @@ class Database:
             )
         if len(bottles) < 1:
             print("Bottle not found in Database!")
-            url = "https://api.upcitemdb.com/prod/trial/lookup?upc=%s" % (upc)
-            response = requests.get(url)
-            response.raise_for_status()  # check for errors
-
-            # Load JSON data into a Python variable.
-            jsonData = json.loads(response.text)
-            try:
-                data = jsonData["items"][0]
-            except IndexError:
-                print("data incorrect? ")
-                print("JSONRAW: ", jsonData)
-            upc = data["upc"]
-            title = data["title"]
-            brand = data["brand"]
-            price = data["offers"][0]["price"]
-            image = data["images"][0]
-            link = data["offers"][0]["link"]
-            bottles.append(
-                {
-                    "upc": upc,
-                    "title": title,
-                    "brand": brand,
-                    "price": price,
-                    "image": image,
-                    "link": link,
-                    "date": date.today(),
-                    "data": data,
-                    "new": True,
-                }
-            )
-
+            data = self.searchUPC(upc=upc)
+            if data:
+                bottles.append(
+                    {
+                        "upc": data["upc"],
+                        "title": data["title"],
+                        "brand": data["brand"],
+                        "price": data["offers"][0]["price"],
+                        "image": data["images"][0],
+                        "link": data["offers"][0]["link"],
+                        "date": date.today(),
+                        "data": data,
+                        "new": True,
+                    }
+                )
+            else:
+                print("Bottle not found online!")
+                bottles.append(
+                    {
+                        "upc": upc,
+                        "title": None,
+                        "brand": None,
+                        "price": None,
+                        "image": None,
+                        "link": None,
+                        "date": date.today(),
+                        "data": None,
+                        "new": True,
+                    }
+                )
         # commit the changes
-        cursor.close()
         return bottles
 
     def __del__(self):

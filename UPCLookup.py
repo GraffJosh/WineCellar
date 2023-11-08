@@ -22,7 +22,7 @@ else:
 
 for bottle in last_bottles:
     if bottle.new:
-        cellarDB.insert_bottle(table="bottles", data=bottle.getData())
+        cellarDB.put(table="bottles", data=bottle.getData())
         print("New bottle! ", bottle.title, " Enjoy!")
         bottle.print()
     else:
