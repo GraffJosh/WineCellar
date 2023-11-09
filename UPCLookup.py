@@ -2,6 +2,7 @@ import wineBottle
 import barcodeScanner as barcodeScanner
 import wineBottle
 import database
+import webDB
 import reviewer
 import config
 
@@ -11,7 +12,7 @@ sommelier = reviewer.Reviewer(
     inApiKey=config.openAI_apiKey,
     inOrganization=config.openAI_organization,
 )
-
+search_providers = [cellarDB, webDB]
 bottles = []
 upc_codes = []
 while True:
@@ -28,10 +29,18 @@ while True:
                 # We have seen it now.
                 upc_codes.append(code)
                 # lookup the UPC in the database and then online.
-                searchedBottlesDicts = cellarDB.lookupUPC(inTable="bottles", upc=code)
+                for provider in search_providers:
+                    found_bottles = provider.search(code)
+                    print(found_bottles)
+                    if found_bottles:
+                        continue
+                    else:
+                        print("bottle not found in ", provider.name())
+
+                # searchedBottlesDicts = cellarDB.lookupUPC(inTable="bottles", upc=code)
                 # if we got any hits, add them to our list.
-                if len(searchedBottlesDicts) > 0:
-                    for bottleDict in searchedBottlesDicts:
+                if len(found_bottles) > 0:
+                    for bottleDict in found_bottles:
                         last_bottles.append(wineBottle.WineBottle(inDict=bottleDict))
                 else:
                     print("bottle not found by DB")

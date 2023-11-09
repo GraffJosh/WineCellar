@@ -1,6 +1,5 @@
 import mysql.connector
 from mysql.connector import errorcode
-import json, requests
 import logging
 import time
 from datetime import date as datettimedate
@@ -74,6 +73,8 @@ class Database:
     def get(self, inTable=None, inCol=None, inCondition=None):
         self.connect()
         cursor = self.cnx.cursor(buffered=True)
+        if not inTable:
+            inTable = self.default_table
         commandList = []
         results = []
         commandStr = "SELECT * FROM {} ".format(inTable)
@@ -129,73 +130,69 @@ class Database:
         self.cnx.commit()
         cursor.close()
 
-    def searchUPC(self, upc):
-        url = "https://api.upcitemdb.com/prod/trial/lookup?upc=%s" % (upc)
-        response = requests.get(url)
-        response.raise_for_status()  # check for errors
-
-        # Load JSON data into a Python variable.
-        jsonData = json.loads(response.text)
-        try:
-            data = jsonData["items"][0]
-        except IndexError:
-            print("data incorrect? ")
-            print("JSONRAW: ", jsonData)
-        return data
-
-    def lookupUPC(self, inTable, upc):
-        results = self.get(inTable=inTable, inCol="upc", inCondition=[upc])
-        print(results)
+    def search(self, upc):
+        results = self.get(inTable=self.default_table, inCol="upc", inCondition=[upc])
         bottles = []
-        if results:
-            for upc, title, brand, price, image, link, date, data in results:
-                bottles.append(
-                    {
-                        "upc": upc,
-                        "title": title,
-                        "brand": brand,
-                        "price": price,
-                        "image": image,
-                        "link": link,
-                        "date": date,
-                        "data": data,
-                        "new": False,
-                    }
-                )
-        if not len(bottles):
-            print("Bottle not found in Database!")
-            data = self.searchUPC(upc=upc)
-            if data:
-                bottles.append(
-                    {
-                        "upc": data["upc"],
-                        "title": data["title"],
-                        "brand": data["brand"],
-                        "price": data["offers"][0]["price"],
-                        "image": data["images"][0],
-                        "link": data["offers"][0]["link"],
-                        "date": date.today(),
-                        "data": data,
-                        "new": True,
-                    }
-                )
-            else:
-                print("Bottle not found online!")
-                bottles.append(
-                    {
-                        "upc": upc,
-                        "title": None,
-                        "brand": None,
-                        "price": None,
-                        "image": None,
-                        "link": None,
-                        "date": date.today(),
-                        "data": None,
-                        "new": True,
-                    }
-                )
-        # commit the changes
+        for upc, title, brand, price, image, link, date, data in results:
+            bottles.append(
+                {
+                    "upc": upc,
+                    "title": title,
+                    "brand": brand,
+                    "price": price,
+                    "image": image,
+                    "link": link,
+                    "date": date,
+                    "data": data,
+                    "new": False,
+                }
+            )
         return bottles
+
+    def name(self):
+        return self.config["host"]
+
+    # def lookupUPC(self, inTable, upc):
+    #     results = self.get(inTable=inTable, inCol="upc", inCondition=[upc])
+    #     print(results)
+    #     bottles = []
+    #     if results:
+    #         for upc, title, brand, price, image, link, date, data in results:
+    #             bottles.append(
+    #                 {
+    #                     "upc": upc,
+    #                     "title": title,
+    #                     "brand": brand,
+    #                     "price": price,
+    #                     "image": image,
+    #                     "link": link,
+    #                     "date": date,
+    #                     "data": data,
+    #                     "new": False,
+    #                 }
+    #             )
+    #     if not len(bottles):
+    #         print("Bottle not found in Database!")
+    #         data = self.searchUPC(upc=upc)
+    #         if data:
+    #             bottles.append()
+    #         else:
+    #             print("Bottle not found online!")
+    #             bottles.append(
+    #                 {
+    #                     "upc": upc,
+    #                     "title": None,
+    #                     "brand": None,
+    #                     "price": None,
+    #                     "image": None,
+    #                     "link": None,
+    #                     "date": date.today(),
+    #                     "data": None,
+    #                     "new": True,
+    #                 }
+    #             )
+    #     # commit the changes
+    #     return bottles
 
     def __del__(self):
         self.disconnect()
