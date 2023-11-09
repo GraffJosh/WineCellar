@@ -30,6 +30,7 @@ class BarcodeScanner:
         else:
             runningTimeout = inTimeout
 
+        print("Begin Scanning")
         while len(decoded_barcodes) < 1 and ((i < runningTimeout) or (runningTimeout == -1)):
             i += 1
             last_image = self.camera.getNewImage()

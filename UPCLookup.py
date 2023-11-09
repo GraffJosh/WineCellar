@@ -28,7 +28,7 @@ while True:
                 # We have seen it now.
                 upc_codes.append(code)
                 # lookup the UPC in the database and then online.
-                searchedBottlesDicts = cellarDB.lookupUPC(table="bottles", upc=code)
+                searchedBottlesDicts = cellarDB.lookupUPC(inTable="bottles", upc=code)
                 # if we got any hits, add them to our list.
                 if len(searchedBottlesDicts) > 0:
                     for bottleDict in searchedBottlesDicts:

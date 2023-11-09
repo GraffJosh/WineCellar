@@ -145,22 +145,24 @@ class Database:
 
     def lookupUPC(self, inTable, upc):
         results = self.get(inTable=inTable, inCol="upc", inCondition=[upc])
+        print(results)
         bottles = []
-        for upc, title, brand, price, image, link, date, data in results:
-            bottles.append(
-                {
-                    "upc": upc,
-                    "title": title,
-                    "brand": brand,
-                    "price": price,
-                    "image": image,
-                    "link": link,
-                    "date": date,
-                    "data": data,
-                    "new": False,
-                }
-            )
-        if len(bottles) < 1:
+        if results:
+            for upc, title, brand, price, image, link, date, data in results:
+                bottles.append(
+                    {
+                        "upc": upc,
+                        "title": title,
+                        "brand": brand,
+                        "price": price,
+                        "image": image,
+                        "link": link,
+                        "date": date,
+                        "data": data,
+                        "new": False,
+                    }
+                )
+        if not len(bottles):
             print("Bottle not found in Database!")
             data = self.searchUPC(upc=upc)
             if data:
