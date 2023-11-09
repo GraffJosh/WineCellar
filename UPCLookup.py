@@ -6,7 +6,7 @@ import webDB
 import reviewer
 import config
 
-cellarDB = database.Database(database_name="wine_list")
+cellarDB = database.Database(database_name="wine_list", default_table="bottles")
 scanner = barcodeScanner.BarcodeScanner(pixelWidth=1280, pixelHeight=720)
 sommelier = reviewer.Reviewer(
     inApiKey=config.openAI_apiKey,
@@ -24,6 +24,7 @@ while True:
     # begin UPC lookup Loop
     if len(last_codes) > 0:
         for code in last_codes:
+            code = code.strip("0")
             # if we haven't seen the code in this session, go look it up.
             if code not in upc_codes:
                 # We have seen it now.
@@ -33,25 +34,29 @@ while True:
                     found_bottles = provider.search(code)
                     print(found_bottles)
                     if found_bottles:
-                        continue
+                        print("Bottle found in ",provider.name())
+                        break
                     else:
                         print("bottle not found in ", provider.name())
 
                 # searchedBottlesDicts = cellarDB.lookupUPC(inTable="bottles", upc=code)
                 # if we got any hits, add them to our list.
                 if len(found_bottles) > 0:
-                    for bottleDict in found_bottles:
-                        last_bottles.append(wineBottle.WineBottle(inDict=bottleDict))
+                    for bottle in found_bottles:
+                        if bottle["upc"] is not None:
+                            last_bottles.append(wineBottle.WineBottle(inDict=bottle))
                 else:
-                    print("bottle not found by DB")
+                    print("Bottle lookup failed!")
+                    last_bottles.append(wineBottle.WineBottle(upc=str(code),new=True))
     else:
         print("No barcodes detected")
 
     # after we saw some bottles, we can look at the bottles we've seen.
     for bottle in last_bottles:
         if bottle.new:
-            bottle.review = sommelier.getReview(inItemName=bottle.title)
-            cellarDB.put(table="bottles", data=bottle.getData())
+            if bottle.title is not "":
+                bottle.review = sommelier.getReview(inItemName=bottle.title)
+            cellarDB.put(inTable="bottles", inDict=bottle.getData())
             print("A new bottle!: ", bottle.title)
         else:
             print("An old favorite, obviously. Enjoy: ", bottle.title)

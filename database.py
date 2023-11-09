@@ -133,20 +133,21 @@ class Database:
     def search(self, upc):
         results = self.get(inTable=self.default_table, inCol="upc", inCondition=[upc])
         bottles = []
-        for upc, title, brand, price, image, link, date, data in results:
-            bottles.append(
-                {
-                    "upc": upc,
-                    "title": title,
-                    "brand": brand,
-                    "price": price,
-                    "image": image,
-                    "link": link,
-                    "date": date,
-                    "data": data,
-                    "new": False,
-                }
-            )
+        if results[0] is not None:
+            for upc, title, brand, price, image, link, date, data in results:
+                bottles.append(
+                    {
+                        "upc": upc,
+                        "title": title,
+                        "brand": brand,
+                        "price": price,
+                        "image": image,
+                        "link": link,
+                        "date": date,
+                        "data": data,
+                        "new": False,
+                    }
+                )
         return bottles
 
     def name(self):
