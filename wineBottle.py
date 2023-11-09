@@ -2,13 +2,16 @@ from datetime import date
 
 
 class WineBottle:
-    def __init__(self, upc="", title="", brand="", price="", image="", link="", new=None) -> None:
+    def __init__(
+        self, upc="", title="", brand="", price="", image="", link="", inReview=None, new=None
+    ) -> None:
         self.upc = upc
         self.title = title
         self.brand = brand
         self.price = price
         self.image = image
         self.link = link
+        self.review = inReview
         self.data = ""
         self.new = new
         self.date = date.today()
@@ -35,6 +38,8 @@ class WineBottle:
             self.price = inDict["price"]
             self.image = inDict["image"]
             self.link = inDict["link"]
+            if "review" in list(inDict.keys()):
+                self.review = inDict["review"]
             self.date = inDict["date"]
         except KeyError as errortext:
             print("missing key", errortext)
@@ -49,7 +54,7 @@ class WineBottle:
         print("image: ", self.image)
         print("link: ", self.link)
         print("date: ", self.date)
-        print("data: ", self.data)
+        print("Review: ", self.review)
         print()
         print()
 
@@ -62,5 +67,6 @@ class WineBottle:
             "image": str(self.image),
             "link": str(self.link),
             "date": str(self.date),
+            "review": str(self.review),
             "data": str(self.data),
         }

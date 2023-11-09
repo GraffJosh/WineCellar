@@ -2,9 +2,9 @@ from openai import OpenAI
 
 
 class Reviewer:
-    def __init__(self, api_key="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") -> None:
+    def __init__(self, inApiKey, inOrganization, timeout=15) -> None:
         self.client = OpenAI(
-            api_key=api_key, max_retries=5, organization="org-wFj0zUFZz9n48pp48II4mZJW", timeout=15
+            api_key=inApiKey, max_retries=5, organization=inOrganization, timeout=timeout
         )
         self.reviews = {}
         self.totalTokens = 0
