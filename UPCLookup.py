@@ -3,13 +3,13 @@ import barcodeScanner as barcodeScanner
 import wineBottle
 import database
 import reviewer
-
+import config
 
 cellarDB = database.Database(database_name="wine_list")
 scanner = barcodeScanner.BarcodeScanner(pixelWidth=1280, pixelHeight=720)
 sommelier = reviewer.Reviewer(
-    inApiKey="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",
-    inOrganization="org-wFj0zUFZz9n48pp48II4mZJW",
+    inApiKey=config.openAI_apiKey,
+    inOrganization=config.openAI_organization,
 )
 
 bottles = []

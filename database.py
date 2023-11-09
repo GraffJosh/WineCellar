@@ -120,9 +120,6 @@ class Database:
             "(upc, title, brand, price, image, link, date) "
             "VALUES (%(upc)s, %(title)s,%(brand)s,%(price)s,%(image)s,%(link)s,%(date)s)"
         ).format(table)
-        print()
-        print("data: ", data)
-        print()
         try:
             cursor.execute(add_bottle, data)
         except mysql.connector.errors.DatabaseError:
