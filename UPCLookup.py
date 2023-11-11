@@ -13,6 +13,11 @@ sommelier = reviewer.Reviewer(
     inOrganization=config.openAI_organization,
 )
 search_providers = [cellarDB, webDB]
+configuration_message = {
+    "role": "system",
+    "content": "You are a relaxed sommelier, who keeps reviews short, sweet, and interesting.",
+}
+
 bottles = []
 upc_codes = []
 while True:
@@ -34,7 +39,7 @@ while True:
                     found_bottles = provider.search(code)
                     print(found_bottles)
                     if found_bottles:
-                        print("Bottle found in ",provider.name())
+                        print("Bottle found in ", provider.name())
                         break
                     else:
                         print("bottle not found in ", provider.name())
@@ -47,7 +52,7 @@ while True:
                             last_bottles.append(wineBottle.WineBottle(inDict=bottle))
                 else:
                     print("Bottle lookup failed!")
-                    last_bottles.append(wineBottle.WineBottle(upc=str(code),new=True))
+                    last_bottles.append(wineBottle.WineBottle(upc=str(code), new=True))
     else:
         print("No barcodes detected")
 
@@ -55,7 +60,13 @@ while True:
     for bottle in last_bottles:
         if bottle.new:
             if bottle.title is not "":
-                bottle.review = sommelier.getReview(inItemName=bottle.title)
+                review_message = {
+                    "role": "user",
+                    "content": "Please provide tasting notes on: {}".format(bottle.title),
+                }
+                bottle.review = sommelier.getReview(
+                    {bottle.title: [configuration_message, review_message]}
+                )
             cellarDB.put(inTable="bottles", inDict=bottle.getData())
             print("A new bottle!: ", bottle.title)
         else:
