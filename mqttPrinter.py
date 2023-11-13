@@ -27,12 +27,12 @@ class MqttPrinter:
     def on_message(self, client, userdata, msg):
         topic = msg.topic.split("/")
         print(msg.topic + " " + str(msg.payload))
-        if topic[-1] == self.topics["requestCompletion"]:
+        if "requestCompletion" in topic[-1]:
             with self.newPrompt:
                 self.promptsQueue.put(str(msg.payload))
                 self.newPrompt.notify()
 
-        if topic[-1] == self.topics["setMaxTokens"]:
+        if "setMaxTokens" in topic[-1]:
             self.bot.setMaxTokens(int(msg.payload))
 
     def printQueue(self) -> None:
