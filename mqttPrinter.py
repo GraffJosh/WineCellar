@@ -42,7 +42,7 @@ class MqttPrinter:
                         inPrintFunction=self.printChunk,
                         # completionFunction=self.cut,
                     )
-                self.cut()
+                    self.cut()
                 self.newPrompt.wait()
                 time.sleep(0.5)
 
@@ -139,7 +139,7 @@ class MqttPrinter:
             except:
                 continue
 
-    def __init__(self, daemon=False,inConfig="config", inPrintTopic="", inConfigTopic="") -> None:
+    def __init__(self, daemon=False, inConfig="config", inPrintTopic="", inConfigTopic="") -> None:
         self.config = __import__(inConfig)
         self.textWidth = 40
         self.lastSentMessageInfo = None
