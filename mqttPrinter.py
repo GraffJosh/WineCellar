@@ -16,7 +16,7 @@ class MqttPrinter:
 
     def on_disconnect(self, userdata, flags, rc):
         print("MQTT Client disconnected?")
-        self.connect()
+        self.client.reconnect()
 
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg):
@@ -30,27 +30,27 @@ class MqttPrinter:
         self.textWidth = width
 
     def print(self, inText):
-        text = textwrap.fill(
-            inText,
-            width=self.textWidth,
-            initial_indent="",
-            subsequent_indent="",
-            expand_tabs=True,
-            replace_whitespace=True,
-            fix_sentence_endings=True,
-            break_long_words=True,
-            drop_whitespace=True,
-            break_on_hyphens=True,
-            tabsize=8,
-            max_lines=None,
-        )
+        text = inText
+        # text = textwrap.fill(
+        #     text,
+        #     width=self.textWidth,
+        #     initial_indent="",
+        #     subsequent_indent="",
+        #     expand_tabs=False,
+        #     replace_whitespace=False,
+        #     fix_sentence_endings=True,
+        #     break_long_words=True,
+        #     drop_whitespace=True,
+        #     break_on_hyphens=True,
+        #     tabsize=8,
+        #     max_lines=None,
+        # )
         self.lastSentMessageInfo = self.client.publish(
             self.config.PRINT_TOPIC, str({"text": str(text + "\r\n")})
         )
 
     def printAndCut(self, inText):
         self.print(inText=inText)
-        self.feed(inLength=7)
         self.cut()
 
     def printImage(self, filename):
@@ -64,17 +64,15 @@ class MqttPrinter:
         # pix = pix.reshape(600, 600)
         width = pix.shape[0]
         height = pix.shape[1]
-        print(pix.shape)
         pix = pix.flatten()
-        # pix = pix[0]
-        print(pix)
-
+        image_bytes = pix.tobytes("C")
         self.client.publish(
             self.config.IMAGE_TOPIC,
-            payload=str({"image": list(pix), "width": width, "height": height}),
+            payload=str({"image": image_bytes, "width": width, "height": height}),
         )
 
     def cut(self):
+        self.feed(inLength=7)
         self.client.publish(self.config.CUT_TOPIC, str({"cut": "True"}))
 
     def feed(self, inLength=0):
@@ -100,7 +98,7 @@ class MqttPrinter:
 
     def __init__(self, inConfig="config", inPrintTopic="", inConfigTopic="") -> None:
         self.config = __import__(inConfig)
-        self.textWidth = 42
+        self.textWidth = 40
         self.lastSentMessageInfo = None
         self.client = mqtt.Client()
         self.client.max_inflight_messages_set(1)
@@ -116,5 +114,7 @@ class MqttPrinter:
 
         self.configurePrinter(self.config.PRINTER_CONFIGURATION)
         # self.print("Client Online!")
+        self.client.loop_start()
 
-        # self.client.loop_forever()
+    def __del__(self):
+        self.client.loop_stop()

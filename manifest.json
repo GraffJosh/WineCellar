@@ -1,0 +1,27 @@
+{
+    "domain": "MQTT Thermal Printer",
+    "name": "ThermalPrinter",
+    "codeowners": ["graffjosh"],
+    "dependencies": [
+                    "openai",
+                    "collections",
+                    "time",
+                    "httpx",
+                    "paho.mqtt.client",
+                    "time",
+                    "numpy",
+                    "textwrap",
+                    "PIL",
+                    "io",
+                    "picamera2",
+                    "PIL",
+                    "frame_server",
+                    "json",
+                     "datetime",
+                    "requests",
+                    "logging"],
+    "documentation": "https://www.example.com",
+    "integration_type": "helper",
+    "iot_class": "local_polling",
+    "requirements": []
+  }
