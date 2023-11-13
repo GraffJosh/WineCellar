@@ -15,7 +15,8 @@ class MqttPrinter:
 
         # Subscribing in on_connect() means that if we lose the connection and
         # reconnect then subscriptions will be renewed.
-        self.client.subscribe("/printer/requestCompletion")
+        for topic in self.config.SUBSCRIBE_TOPICS:
+            self.client.subscribe(topic)
 
     def on_disconnect(self, userdata, flags, rc):
         print("MQTT Client disconnected?")
@@ -26,9 +27,13 @@ class MqttPrinter:
     def on_message(self, client, userdata, msg):
         topic = msg.topic.split("/")
         print(msg.topic + " " + str(msg.payload))
-        with self.newPrompt:
-            self.promptsQueue.put(str(msg.payload))
-            self.newPrompt.notify()
+        if topic[-1] == self.topics["requestCompletion"]:
+            with self.newPrompt:
+                self.promptsQueue.put(str(msg.payload))
+                self.newPrompt.notify()
+
+        if topic[-1] == self.topics["setMaxTokens"]:
+            self.bot.setMaxTokens(int(msg.payload))
 
     def printQueue(self) -> None:
         with self.newPrompt:
@@ -158,6 +163,7 @@ class MqttPrinter:
         self.promptsQueue = queue.Queue()
         self.newPrompt = threading.Condition()
         self.line_length = self.config.PRINTER_CONFIGURATION["line_length"]
+
         self.bot = robot.Robot()
 
         self.configurePrinter(self.config.PRINTER_CONFIGURATION)
