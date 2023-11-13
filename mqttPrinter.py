@@ -40,7 +40,6 @@ class MqttPrinter:
             while True:
                 # self.newPrompt.clear()
                 if not self.promptsQueue.empty():
-                    self.print("One sec, let me consider that...")
                     self.feed(3)
                     self.bot.respondTo(
                         inText=self.promptsQueue.get(),
