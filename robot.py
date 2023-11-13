@@ -91,7 +91,6 @@ class Robot:
         return self.last_response
 
     def liveResponse(self, inMessages=[], inPrintFunction=None):
-        lastString = ""
         response = {}
         response["status"] = False
         response["response"] = ""
@@ -102,16 +101,11 @@ class Robot:
             stream=True,
         ):
             content = chunk.choices[0].delta.content
+            # print(content)
             if content:
-                lastString += content
                 response["response"] += content
                 response["status"] = True
-                if "\n" in content:
-                    inPrintFunction(lastString)
-                    lastString = ""
-            else:
-                inPrintFunction(lastString)
-                response["response"] += lastString
+                inPrintFunction(content)
         return response
 
     def getTextCompletion(self, text, inPrintFunction=None):
