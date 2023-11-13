@@ -132,8 +132,8 @@ class MqttPrinter:
                 self.config.CONFIG_TOPIC, payload=str('{"' + key + '":' + str(value) + "}")
             )
 
-    def for_canonical(self, f):
-        return lambda k: f(l.canonical(k))
+    # def for_canonical(self, f):
+    #     return lambda k: f(l.canonical(k))
 
     def connect(self):
         hosts = ["homeassistant.local", "192.168.1.103", "192.168.1.105"]
