@@ -139,7 +139,7 @@ class MqttPrinter:
             except:
                 continue
 
-    def __init__(self, inConfig="config", inPrintTopic="", inConfigTopic="") -> None:
+    def __init__(self, daemon=False,inConfig="config", inPrintTopic="", inConfigTopic="") -> None:
         self.config = __import__(inConfig)
         self.textWidth = 40
         self.lastSentMessageInfo = None
@@ -162,10 +162,13 @@ class MqttPrinter:
 
         self.configurePrinter(self.config.PRINTER_CONFIGURATION)
         # self.print("Client Online!")
-        self.client.loop_start()
         self.printQueueThread = threading.Thread(target=self.printQueue)
         self.printQueueThread.setDaemon(True)
         self.printQueueThread.start()
+        if daemon:
+            self.client.loop_forever()
+        else:
+            self.client.loop_start()
 
     def __del__(self):
         self.client.loop_stop()
