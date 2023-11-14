@@ -32,6 +32,8 @@ class Robot:
         self.totalTokens = 0
         self.lengthTolerance = 20
         self.lastResponse = {}
+        self.lastRequestTime = time.time()
+        self.historyTimeout = self.config.HISTORY_TIMEOUT
 
     def init_logger(self):
         logging.basicConfig(
@@ -72,6 +74,10 @@ class Robot:
     def sendRequest(self, inMessages=[]):
         response = "Sorry, I don't know about that!"
         response_status = False
+        if time.time() - self.lastRequestTime > self.historyTimeout:
+            print("History Timeout: resetting history")
+            self.resetConversation()
+        self.lastRequestTime = time.time()
         try:
             print(inMessages)
             completion = self.client.chat.completions.create(
@@ -95,18 +101,25 @@ class Robot:
         response = {}
         response["status"] = False
         response["response"] = ""
-        for chunk in self.client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=inMessages,
-            max_tokens=self.maxTokens,
-            stream=True,
-        ):
-            content = chunk.choices[0].delta.content
-            # print(content)
-            if content:
-                response["response"] += content
-                response["status"] = True
-                inPrintFunction(content)
+        if time.time() - self.lastRequestTime > self.historyTimeout:
+            print("History Timeout: resetting history")
+            self.resetConversation()
+        self.lastRequestTime = time.time()
+        try:
+            for chunk in self.client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=inMessages,
+                max_tokens=self.maxTokens,
+                stream=True,
+            ):
+                content = chunk.choices[0].delta.content
+                # print(content)
+                if content:
+                    response["response"] += content
+                    response["status"] = True
+                    inPrintFunction(content)
+        except BaseException as error:
+            print("Error connecting to OpenAI: ", error)
         return response
 
     def getTextCompletion(self, text, inPrintFunction=None):
