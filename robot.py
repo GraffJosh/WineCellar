@@ -48,6 +48,7 @@ class Robot:
         self.timeout = timeout
 
     def setMaxTokens(self, inMaxTokens):
+        print("set max tokens: ", inMaxTokens)
         self.maxTokens = inMaxTokens
 
     def getLastResponse(self):

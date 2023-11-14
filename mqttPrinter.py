@@ -4,6 +4,7 @@ import numpy as np
 import textwrap
 import threading
 import queue
+import struct
 from PIL import Image
 import robot
 
@@ -33,7 +34,8 @@ class MqttPrinter:
                 self.newPrompt.notify()
 
         if "setMaxTokens" in topic[-1]:
-            self.bot.setMaxTokens(int(msg.payload))
+            print(msg.payload)
+            self.bot.setMaxTokens(int(float(msg.payload.decode(encoding="utf-8", errors="strict"))))
 
     def printQueue(self) -> None:
         with self.newPrompt:
@@ -131,8 +133,8 @@ class MqttPrinter:
                 self.config.CONFIG_TOPIC, payload=str('{"' + key + '":' + str(value) + "}")
             )
 
-    # def for_canonical(self, f):
-    #     return lambda k: f(l.canonical(k))
+    def publishPrinterStatus(self, inStatus=""):
+        self.client.publish(self.config.STATUS_TOPIC, payload=inStatus)
 
     def connect(self):
         hosts = ["homeassistant.local", "192.168.1.103", "192.168.1.105"]
