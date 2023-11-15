@@ -34,6 +34,7 @@ class Robot:
         self.lastResponse = {}
         self.lastRequestTime = time.time()
         self.historyTimeout = self.config.HISTORY_TIMEOUT
+        self.abort = False
 
     def init_logger(self):
         logging.basicConfig(
@@ -77,6 +78,8 @@ class Robot:
         if time.time() - self.lastRequestTime > self.historyTimeout:
             print("History Timeout: resetting history")
             self.resetConversation()
+        else:
+            print("History active, entries: ", self.conversationHistory.count())
         self.lastRequestTime = time.time()
         try:
             print(inMessages)
@@ -97,7 +100,7 @@ class Robot:
         self.last_response = {"status": response_status, "response": response}
         return self.last_response
 
-    def liveResponse(self, inMessages=[], inPrintFunction=None):
+    def liveResponse(self, inMessages=[], inPrintFunction=None, inStatusFunction=None):
         response = {}
         response["status"] = False
         response["response"] = ""
@@ -105,6 +108,8 @@ class Robot:
             print("History Timeout: resetting history")
             self.resetConversation()
         self.lastRequestTime = time.time()
+        if inStatusFunction:
+            inStatusFunction("generating")
         try:
             for chunk in self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
@@ -118,11 +123,18 @@ class Robot:
                     response["response"] += content
                     response["status"] = True
                     inPrintFunction(content)
+                if self.abort:
+                    inPrintFunction("\r\nSorry, I'll stop now!")
+                    self.abort = False
+                    return response
         except BaseException as error:
             print("Error connecting to OpenAI: ", error)
+
+        if inStatusFunction:
+            inStatusFunction("ready")
         return response
 
-    def getTextCompletion(self, text, inPrintFunction=None):
+    def getTextCompletion(self, text, inPrintFunction=None, inStatusFunction=None):
         request_messages = [{"role": "system", "content": self.config.INITIAL_MESSAGE}]
         if self.conversationHistory:
             request_messages.extend(self.conversationHistory)
@@ -134,7 +146,9 @@ class Robot:
         )
         if inPrintFunction is not None:
             response = self.liveResponse(
-                inMessages=request_messages, inPrintFunction=inPrintFunction
+                inMessages=request_messages,
+                inPrintFunction=inPrintFunction,
+                inStatusFunction=inStatusFunction,
             )
         else:
             response = self.sendRequest(inMessages=request_messages)
@@ -153,8 +167,15 @@ class Robot:
             )
         return response
 
-    def respondTo(self, inText="", inPrintFunction=None, completionFunction=None):
-        result = self.getTextCompletion(inText, inPrintFunction=inPrintFunction)
+    def respondTo(
+        self, inText="", inPrintFunction=None, completionFunction=None, inStatusFunction=None
+    ):
+        result = self.getTextCompletion(
+            inText, inPrintFunction=inPrintFunction, inStatusFunction=inStatusFunction
+        )
         if completionFunction:
             completionFunction()
         return result["response"]
+
+    def abortResponse(self):
+        self.abort = True

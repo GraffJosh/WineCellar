@@ -6,6 +6,7 @@ import threading
 import queue
 import struct
 from PIL import Image
+import json
 import robot
 
 
@@ -26,18 +27,30 @@ class MqttPrinter:
 
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg):
-        topic = msg.topic.split("/")
-        print(msg.topic + " " + str(msg.payload))
-        if "requestCompletion" in topic[-1]:
+        # topic = msg.topic.split("/")
+        payload = msg.payload.decode(encoding="utf-8", errors="strict")
+        print(msg.topic + " " + payload)
+        if self.config.COMPLETION_TOPIC == msg.topic:
             with self.newPrompt:
-                self.promptsQueue.put(str(msg.payload))
-                self.newPrompt.notify()
+                json_payload = json.loads(payload)
+                if "cut" in json_payload.keys():
+                    self.autoCut = bool(json_payload["cut"])
+                if "prompt" in json_payload.keys():
+                    self.promptsQueue.put(str(json_payload["prompt"]))
+                    self.newPrompt.notify()
 
-        if "setMaxTokens" in topic[-1]:
-            print(msg.payload)
-            self.bot.setMaxTokens(int(float(msg.payload.decode(encoding="utf-8", errors="strict"))))
+        # if "printText" == msg.topic:
+        #     self.print(str(msg.payload))
 
-    def printQueue(self) -> None:
+        if self.config.MAX_TOKENS_TOPIC == msg.topic:
+            print(payload)
+            self.bot.setMaxTokens(int(float(payload)))
+        if self.config.DEVICE_STATUS_TOPIC == msg.topic:
+            self.status = payload
+        if self.config.BOT_STATUS_TOPIC == msg.topic:
+            self.botStatusText = payload
+
+    def botQueue(self) -> None:
         with self.newPrompt:
             while True:
                 # self.newPrompt.clear()
@@ -46,9 +59,10 @@ class MqttPrinter:
                     self.bot.respondTo(
                         inText=self.promptsQueue.get(),
                         inPrintFunction=self.printChunk,
-                        # completionFunction=self.cut,
+                        inStatusFunction=self.botStatus,
                     )
-                    # self.cut()
+                    if self.autoCut:
+                        self.cut()
                 self.newPrompt.wait()
                 time.sleep(0.5)
 
@@ -109,6 +123,7 @@ class MqttPrinter:
         #     tabsize=8,
         #     max_lines=None,
         # )
+        # self.statusPrinting()
         self.lastSentMessageInfo = self.client.publish(
             self.config.PRINT_TOPIC, str({"text": str(text + "\r\n")})
         )
@@ -133,8 +148,8 @@ class MqttPrinter:
                 self.config.CONFIG_TOPIC, payload=str('{"' + key + '":' + str(value) + "}")
             )
 
-    def publishPrinterStatus(self, inStatus=""):
-        self.client.publish(self.config.STATUS_TOPIC, payload=inStatus)
+    def botStatus(self, status):
+        self.client.publish(self.config.BOT_STATUS_TOPIC, payload=status)
 
     def connect(self):
         hosts = ["homeassistant.local", "192.168.1.103", "192.168.1.105"]
@@ -149,6 +164,7 @@ class MqttPrinter:
         self.config = __import__(inConfig)
         self.textWidth = 40
         self.lastSentMessageInfo = None
+        self.status = "ready"
         self.client = mqtt.Client()
         self.client.max_inflight_messages_set(1)
         self.client.max_queued_messages_set(1)
@@ -161,6 +177,7 @@ class MqttPrinter:
         self.connect()
         time.sleep(0.1)
         self.current_line = ""
+        self.autoCut = True
         self.promptsQueue = queue.Queue()
         self.newPrompt = threading.Condition()
         self.line_length = self.config.PRINTER_CONFIGURATION["line_length"]
@@ -169,9 +186,9 @@ class MqttPrinter:
 
         self.configurePrinter(self.config.PRINTER_CONFIGURATION)
         # self.print("Client Online!")
-        self.printQueueThread = threading.Thread(target=self.printQueue)
-        self.printQueueThread.setDaemon(True)
-        self.printQueueThread.start()
+        self.botQueueThread = threading.Thread(target=self.botQueue)
+        self.botQueueThread.setDaemon(True)
+        self.botQueueThread.start()
         if daemon:
             self.client.loop_forever()
         else:
@@ -179,4 +196,4 @@ class MqttPrinter:
 
     def __del__(self):
         self.client.loop_stop()
-        self.printQueueThread.join()
+        self.botQueueThread.join()
