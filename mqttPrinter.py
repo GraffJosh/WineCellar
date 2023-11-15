@@ -48,7 +48,7 @@ class MqttPrinter:
                         inPrintFunction=self.printChunk,
                         # completionFunction=self.cut,
                     )
-                    self.cut()
+                    # self.cut()
                 self.newPrompt.wait()
                 time.sleep(0.5)
 
