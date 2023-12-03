@@ -160,8 +160,11 @@ class MqttPrinter:
             except:
                 continue
 
-    def __init__(self, daemon=False, inConfig="config", inPrintTopic="", inConfigTopic="") -> None:
+    def __init__(
+        self, daemon=False, inConfig="config", inKeys="keys", inPrintTopic="", inConfigTopic=""
+    ) -> None:
         self.config = __import__(inConfig)
+        self.keys = __import__(inKeys)
         self.textWidth = 40
         self.lastSentMessageInfo = None
         self.status = "ready"
@@ -172,7 +175,7 @@ class MqttPrinter:
         self.client.on_disconnect = self.on_disconnect
         self.client.on_message = self.on_message
         self.client.username_pw_set(
-            username=self.config.mqtt_username, password=self.config.mqtt_password
+            username=self.keys.mqtt_username, password=self.keys.mqtt_password
         )
         self.connect()
         time.sleep(0.1)

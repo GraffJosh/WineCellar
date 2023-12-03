@@ -6,13 +6,16 @@ import logging
 
 
 class Robot:
-    def __init__(self, inApiKey=None, inOrganization=None, timeout=15, inConfig="config") -> None:
+    def __init__(
+        self, inApiKey=None, inOrganization=None, timeout=15, inConfig="config", inKeys="keys"
+    ) -> None:
         try:
             self.config = __import__(inConfig)
+            self.keys = __import__(inKeys)
             if not inApiKey:
-                inApiKey = self.config.openAI_apiKey
+                inApiKey = self.keys.openAI_apiKey
             if not inOrganization:
-                inOrganization = self.config.openAI_organization
+                inOrganization = self.keys.openAI_organization
         except BaseException as e:
             print(e)
 
