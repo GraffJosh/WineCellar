@@ -8,6 +8,14 @@ import struct
 from PIL import Image
 import json
 import robot
+import escposImage
+import socket
+
+
+def divide_chunks(l, n):
+    # looping till length l
+    for i in range(0, len(l), n):
+        yield l[i : i + n]
 
 
 class MqttPrinter:
@@ -106,6 +114,122 @@ class MqttPrinter:
                     printTo = self.line_length
                 self.print(self.current_line[:printTo])
                 self.current_line = self.current_line[printTo + 1 :]
+
+    def printChars(self, chars):
+        payload = {}
+        payload["chars"] = chars
+        payload["length"] = len(payload["chars"])
+        self.client.publish("printer/chars", json.dumps(payload))
+
+    def printImage(self):
+        imageWidth = 512
+        highDensity = True
+        if highDensity:
+            densityConfig = 33
+            densityMultiplier = 3
+        else:
+            densityConfig = 0
+            densityMultiplier = 1
+        nL = imageWidth & 0x00FF
+        nH = (imageWidth & 0xFF00) >> 8
+        imageWidth = imageWidth * densityMultiplier
+        print("expected number of bytes: ", (nH << 8 | nL), hex(nH), hex(nL))
+        # self.print("\n")
+        self.printChars([27, 85, 255])  # unidirectional printing
+        self.printChars([27, 51, 1])  # set line spacing?
+        self.printChars([27, 42, densityConfig, nL, nH])  # image header
+        # self.printChars([27, 51, 16])
+        line = []
+        value = 0xFF
+        for pixel in range(imageWidth):
+            line.append(value)
+            if value > 0:
+                value = value - 1
+            else:
+                value = 0xFF
+        total_len = 0
+        for chunk in divide_chunks(line, 128):
+            total_len += len(chunk)
+            print(total_len)
+            self.printChars(chars=chunk)  # send data
+            # time.sleep(1)
+
+        print("printLine")
+        time.sleep(0.5)
+        self.printChars([13, 10])
+        self.printChars([27, 85, 0])  # unidirectional printing
+        self.printChars([27, 51, 20])  # set line spacing?
+        # self.printChars([27, 50])
+        # self.printChars([27, 100, 7])
+        # self.printChars([27, 50])  # reset line spacing?
+
+    def socketImage(self, line):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        imageWidth = 512
+        highDensity = True
+        if highDensity:
+            densityConfig = 33
+            densityMultiplier = 3
+        else:
+            densityConfig = 0
+            densityMultiplier = 1
+
+        imageWidth = imageWidth * densityMultiplier
+        line = []
+        value = 0xFF
+        for pixel in range(imageWidth):
+            line.append(value)
+            if value > 0:
+                value = value - 1
+            else:
+                value = 0xFF
+
+        payload = {}
+        payload["listen"] = "true"
+        self.client.publish("printer/tcp/async", json.dumps(payload))
+        payload = {}
+        payload["width"] = 512
+        payload["density"] = "true"
+        self.client.publish("printer/image", json.dumps(payload))
+        time.sleep(2)
+        s.connect(("192.168.1.152", 8888))
+        for i in range(10):
+            print("sending: ", len(bytes(line)), " bytes")
+            s.sendall(bytes(line))
+            time.sleep(0)
+
+    def sendImageBytesToServer(self, data):
+        self.socket.sendall(data)
+
+    def connectToImageServer(self):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.connect(("192.168.1.152", 8888))
+
+    def configurePrinterForImage(self):
+        payload = {}
+        payload["width"] = 512
+        payload["density"] = "true"
+        payload["status"] = "true"
+        self.client.publish("printer/image", json.dumps(payload))
+
+    def printImageComplete(self):
+        payload = {}
+        payload["status"] = "false"
+        self.client.publish("printer/image", json.dumps(payload))
+
+    def printImage(self, filename):
+        image = escposImage.EscposImage(filename)
+        image.set_horizontal()
+        image.fit_width(512)
+        image.center(512)
+        self.configurePrinterForImage()
+        time.sleep(1)
+        self.connectToImageServer()
+        for line in image.to_column_format(True):
+            self.sendImageBytesToServer(line)
+        time.sleep(1)
+        self.printImageComplete()
 
     def print(self, inText):
         text = inText
