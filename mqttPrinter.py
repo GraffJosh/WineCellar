@@ -230,7 +230,7 @@ class MqttPrinter:
         for line in image.to_column_format(True):
             i = i + 1
             self.sendImageBytesToServer(line)
-        time.sleep(i / 5)
+        time.sleep(i / 6)
         self.printImageComplete()
 
     def print(self, inText):

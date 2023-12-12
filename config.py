@@ -4,7 +4,7 @@ INITIAL_MESSAGE = "you are a helpful printer, prioritize: formatting, syntax, an
 MAX_TOKENS = 200
 TIMEOUT = 60
 
-PRINTER_CONFIGURATION = {"speed": 8, "line_length": 42}
+PRINTER_CONFIGURATION = {"speed": 8, "line_length": 42, "autocut": 1}
 CONFIG_TOPIC = "printer/config"
 PRINT_TOPIC = "printer/printText"
 CUT_TOPIC = "printer/cut"
