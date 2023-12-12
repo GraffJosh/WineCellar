@@ -80,23 +80,23 @@ class MqttPrinter:
     def setTextWidth(self, width):
         self.textWidth = width
 
-    def printImage(self, filename):
-        image = Image.open(filename)
-        image.convert(mode="L", dither=3)
-        pix = np.array(image)
-        pix = np.delete(pix, 0, 2)
-        pix = np.delete(pix, 0, 2)
-        pix = np.delete(pix, 0, 2)
+    # def printImage(self, filename):
+    #     image = Image.open(filename)
+    #     image.convert(mode="L", dither=3)
+    #     pix = np.array(image)
+    #     pix = np.delete(pix, 0, 2)
+    #     pix = np.delete(pix, 0, 2)
+    #     pix = np.delete(pix, 0, 2)
 
-        # pix = pix.reshape(600, 600)
-        width = pix.shape[0]
-        height = pix.shape[1]
-        pix = pix.flatten()
-        image_bytes = pix.tobytes("C")
-        self.client.publish(
-            self.config.IMAGE_TOPIC,
-            payload=str({"image": image_bytes, "width": width, "height": height}),
-        )
+    #     # pix = pix.reshape(600, 600)
+    #     width = pix.shape[0]
+    #     height = pix.shape[1]
+    #     pix = pix.flatten()
+    #     image_bytes = pix.tobytes("C")
+    #     self.client.publish(
+    #         self.config.IMAGE_TOPIC,
+    #         payload=str({"image": image_bytes, "width": width, "height": height}),
+    #     )
 
     def printChunk(self, inText=""):
         self.current_line += inText
@@ -218,8 +218,8 @@ class MqttPrinter:
         payload["status"] = 0
         self.client.publish("printer/image", json.dumps(payload))
 
-    def printImage(self, filename):
-        image = escposImage.EscposImage(filename)
+    def printImage(self, imageData):
+        image = escposImage.EscposImage(imageData)
         image.auto_rotate()
         image.fit_width(512)
         image.center(512)

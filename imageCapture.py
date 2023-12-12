@@ -48,10 +48,11 @@ class ImageCapture:
             metadata = request.get_metadata()
             request.release()  # requests must always be returned to libcamera
 
-        self.last_image = self.last_image.convert("L")
-
     def getLastImage(self):
         return self.last_image
+
+    def getLastImageBW(self):
+        return self.last_image.convert("L")
 
     def getNewImage(self):
         self.captureImage()
