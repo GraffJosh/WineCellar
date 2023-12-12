@@ -73,7 +73,11 @@ class EscposImage(object):
         self._im = self._im.rotate(90, Image.NEAREST, expand=1)
         pass
 
-    def fit_width(self, max_width):
+    def auto_rotate(self):
+        if self.width > self.height:
+            self.set_horizontal()
+
+    def fit_width(self, max_width) -> None:
         mywidth = max_width
         wpercent = mywidth / float(self._im.size[0])
         hsize = int((float(self._im.size[1]) * float(wpercent)))

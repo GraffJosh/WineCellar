@@ -210,25 +210,27 @@ class MqttPrinter:
         payload = {}
         payload["width"] = 512
         payload["density"] = "true"
-        payload["status"] = "true"
+        payload["status"] = 1
         self.client.publish("printer/image", json.dumps(payload))
 
     def printImageComplete(self):
         payload = {}
-        payload["status"] = "false"
+        payload["status"] = 0
         self.client.publish("printer/image", json.dumps(payload))
 
     def printImage(self, filename):
         image = escposImage.EscposImage(filename)
-        image.set_horizontal()
+        image.auto_rotate()
         image.fit_width(512)
         image.center(512)
         self.configurePrinterForImage()
         time.sleep(1)
         self.connectToImageServer()
+        i = 0
         for line in image.to_column_format(True):
+            i = i + 1
             self.sendImageBytesToServer(line)
-        time.sleep(1)
+        time.sleep(i / 5)
         self.printImageComplete()
 
     def print(self, inText):
