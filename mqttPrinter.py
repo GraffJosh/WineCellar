@@ -350,5 +350,6 @@ class MqttPrinter:
             self.client.loop_start()
 
     def __del__(self):
-        self.client.loop_stop()
+        if self.client:
+            self.client.loop_stop()
         self.botQueueThread.join()
