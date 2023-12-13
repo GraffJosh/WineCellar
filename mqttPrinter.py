@@ -58,6 +58,12 @@ class MqttPrinter:
         if self.config.BOT_STATUS_TOPIC == msg.topic:
             self.botStatusText = payload
 
+    def getStatus(self):
+        if self.status not in self.config.STATUS_OPTIONS:
+            return "faulted"
+        else:
+            return self.status
+
     def botQueue(self) -> None:
         with self.newPrompt:
             while True:
