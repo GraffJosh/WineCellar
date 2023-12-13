@@ -57,4 +57,4 @@ class CameraPrinter:
     def loop(self):
         while self.daemon:
             self.handleLED()
-            time.sleep(100)
+            time.sleep(0.10)
