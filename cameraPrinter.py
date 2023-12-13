@@ -1,3 +1,4 @@
+from gpiozero import Button, LED
 import time
 
 PIN_RED_LED = 14
@@ -9,8 +10,6 @@ DEBUG = True
 
 class CameraPrinter:
     def __init__(self, daemon=True, pixelWidth=1000, pixelHeight=512, video=False) -> None:
-        from gpiozero import Button, LED
-
         self.red_led = LED(PIN_RED_LED)
         self.blue_led = LED(PIN_BLUE_LED)
         self.green_led = LED(PIN_GREEN_LED)
