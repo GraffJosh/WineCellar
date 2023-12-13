@@ -1,0 +1,15 @@
+[Unit]
+Description=Camera Printer Service
+After=multi-user.target
+[Service]
+Type=simple
+User=joshgraff
+ExecStartPre=/bin/sleep 10
+ExecStartPre=(cd /home/joshgraff/dev/WineCellar) && (git pull)
+Environment="PYTHONPATH=$PYTHONPATH:/home/dietpi/.local/lib/python3.10/site-packages"
+Restart=always
+RuntimeMaxSec=2d
+RestartSec=5
+ExecStart=/home/joshgraff/dev/WineCellar/.venv/bin/python /home/joshgraff/dev/WineCellar/runMqttPrinterServer.py
+[Install]
+WantedBy=multi-user.target
