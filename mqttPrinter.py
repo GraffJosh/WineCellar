@@ -56,7 +56,7 @@ class MqttPrinter:
         if self.config.DEVICE_STATUS_TOPIC == msg.topic:
             self.status = payload
         if self.config.DISCOVER_TOPIC == msg.topic:
-            self.printerDiscover = payload
+            self.printerDiscover = json.loads(payload)
             if "ip" in self.printerDiscover.keys():
                 self.printerIPAddress = self.printerDiscover["ip"]
         if self.config.BOT_STATUS_TOPIC == msg.topic:
