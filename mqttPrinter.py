@@ -22,11 +22,11 @@ class MqttPrinter:
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client, userdata, flags, rc):
         print("Connected with result code " + str(rc))
-
         # Subscribing in on_connect() means that if we lose the connection and
         # reconnect then subscriptions will be renewed.
         for topic in self.config.SUBSCRIBE_TOPICS:
             self.client.subscribe(topic)
+        self.status = "ready"
 
     def on_disconnect(self, userdata, flags, rc):
         print("MQTT Client disconnected? Reason: ", str(rc))
