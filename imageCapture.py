@@ -45,7 +45,7 @@ class ImageCapture:
         # self.setControls()
 
     def setCameraContrast(self, contrast):
-        self.picam2.controls.Constrast = contrast
+        self.picam2.controls.Contrast = contrast
         # self.cameraControls["Contrast"] = contrast
         # self.setControls()
 
