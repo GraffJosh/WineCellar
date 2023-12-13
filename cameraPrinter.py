@@ -5,7 +5,14 @@ PIN_RED_LED = 14
 PIN_BLUE_LED = 15
 PIN_GREEN_LED = 18
 PIN_SWITCH = 23
+red_led = LED(PIN_RED_LED)
+red_led.on()
+
 DEBUG = True
+
+# these imports are below the LED init above to provide status on startup.
+import imageCapture
+import mqttPrinter
 
 
 class CameraPrinter:
@@ -16,9 +23,6 @@ class CameraPrinter:
         self.green_led.off()
         self.red_led.on()
         self.blue_led.off()
-
-        import imageCapture
-        import mqttPrinter
 
         self.daemon = daemon
         self.printer = mqttPrinter.MqttPrinter()
