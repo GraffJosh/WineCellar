@@ -15,8 +15,9 @@ class CameraPrinter:
         self.red_led = LED(PIN_RED_LED)
         self.blue_led = LED(PIN_BLUE_LED)
         self.green_led = LED(PIN_GREEN_LED)
-        self.status = "faulted"
-        self.handleLED()
+        self.green_led.off()
+        self.red_led.on()
+        self.blue_led.off()
 
         self.daemon = daemon
         self.printer = mqttPrinter.MqttPrinter()
