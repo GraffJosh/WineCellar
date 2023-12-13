@@ -1,7 +1,4 @@
-import imageCapture
-import mqttPrinter
 import time
-from gpiozero import Button, LED
 
 PIN_RED_LED = 14
 PIN_BLUE_LED = 15
@@ -12,12 +9,17 @@ DEBUG = True
 
 class CameraPrinter:
     def __init__(self, daemon=True, pixelWidth=1000, pixelHeight=512, video=False) -> None:
+        from gpiozero import Button, LED
+
         self.red_led = LED(PIN_RED_LED)
         self.blue_led = LED(PIN_BLUE_LED)
         self.green_led = LED(PIN_GREEN_LED)
         self.green_led.off()
         self.red_led.on()
         self.blue_led.off()
+
+        import imageCapture
+        import mqttPrinter
 
         self.daemon = daemon
         self.printer = mqttPrinter.MqttPrinter()
