@@ -7,6 +7,7 @@ PIN_RED_LED = 14
 PIN_BLUE_LED = 15
 PIN_GREEN_LED = 18
 PIN_SWITCH = 23
+DEBUG = True
 
 
 class CameraPrinter:
@@ -35,7 +36,6 @@ class CameraPrinter:
 
     def handleLED(self):
         status = self.getStatus()
-        ["ready", "generating", "printing", "faulted"]
         if status == "ready":
             self.green_led.on()
             self.red_led.off()
@@ -50,6 +50,8 @@ class CameraPrinter:
             self.blue_led.off()
 
     def handleShutter(self) -> None:
+        if DEBUG:
+            print("Handle Shutter!")
         self.captureAndPrint()
 
     def loop(self):
