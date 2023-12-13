@@ -252,8 +252,10 @@ class MqttPrinter:
                 self.sendImageBytesToServer(line)
             time.sleep(i / 6)
             self.printImageComplete()
+            return True
         else:
             self.print("\n\n Printing Image Failed! Probably couldn't get the IP Address? Idk.")
+            return False
 
     def print(self, inText):
         text = inText

@@ -19,20 +19,26 @@ class CameraPrinter:
         self.red_led = LED(PIN_RED_LED)
         self.blue_led = LED(PIN_BLUE_LED)
         self.green_led = LED(PIN_GREEN_LED)
+        self.status = "ready"
 
         self.shutter.when_pressed = self.handleShutter
         # self.shutter.when_released = led.off
 
     def captureAndPrint(self):
-        self.printer.printImage(self.camera.getNewImage())
+        if not self.printer.printImage(self.camera.getNewImage()):
+            self.status = "faulted"
+        else:
+            self.status = "ready"
+
+    def setStatus(self, status):
+        self.status = status
 
     def getStatus(self):
         printerStatus = self.printer.getStatus()
-        cameraStatus = "ready"
         if printerStatus != "ready":
             return printerStatus
         else:
-            return cameraStatus
+            return self.status
 
     def handleLED(self):
         status = self.getStatus()
