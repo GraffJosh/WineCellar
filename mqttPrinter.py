@@ -67,6 +67,8 @@ class MqttPrinter:
         if self.status not in self.config.STATUS_OPTIONS:
             return "faulted"
         else:
+            if self.getBotStatus() == "generating":
+                self.status = "generating"
             return self.status
 
     def botQueue(self) -> None:
@@ -305,6 +307,9 @@ class MqttPrinter:
 
     def botStatus(self, status):
         self.client.publish(self.config.BOT_STATUS_TOPIC, payload=status)
+
+    def getBotStatus(self, status):
+        return self.botStatusText
 
     def connect(self):
         hosts = ["homeassistant.local", "192.168.1.103", "192.168.1.105", "localhost"]
