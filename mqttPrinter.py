@@ -29,7 +29,8 @@ class MqttPrinter:
             self.client.subscribe(topic)
 
     def on_disconnect(self, userdata, flags, rc):
-        print("MQTT Client disconnected?")
+        print("MQTT Client disconnected? Reason: ", str(rc))
+        self.status = "faulted"
         time.sleep(5)
         self.client.reconnect()
 
