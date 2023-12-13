@@ -226,6 +226,9 @@ class MqttPrinter:
                 time.sleep(5)
         return False
 
+    def disconnectFromImageServer(self):
+        self.socket.close()
+
     def configurePrinterForImage(self):
         payload = {}
         payload["width"] = 512
@@ -238,7 +241,7 @@ class MqttPrinter:
         payload = {}
         payload["status"] = 0
         self.client.publish("printer/image", json.dumps(payload))
-        self.client.disconnect()
+        self.disconnectFromImageServer()
 
     def printImage(self, imageData):
         image = escposImage.EscposImage(imageData)
