@@ -11,6 +11,6 @@ Environment="PYTHONPATH=$PYTHONPATH:/home/dietpi/.local/lib/python3.10/site-pack
 Restart=always
 RuntimeMaxSec=2d
 RestartSec=5
-ExecStart=/home/joshgraff/dev/WineCellar/.venv/python /home/joshgraff/dev/WineCellar/runMqttCameraPrinter.py
+ExecStart=/home/joshgraff/dev/WineCellar/.venv/bin/python3 /home/joshgraff/dev/WineCellar/runMqttCameraPrinter.py
 [Install]
 WantedBy=multi-user.target
