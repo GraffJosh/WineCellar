@@ -12,14 +12,18 @@ DEBUG = True
 
 class CameraPrinter:
     def __init__(self, daemon=True, pixelWidth=1000, pixelHeight=512, video=False) -> None:
+        self.red_led = LED(PIN_RED_LED)
+        self.blue_led = LED(PIN_BLUE_LED)
+        self.green_led = LED(PIN_GREEN_LED)
+        self.status = "faulted"
+        self.handleLED()
+
         self.daemon = daemon
         self.printer = mqttPrinter.MqttPrinter()
         self.camera = imageCapture.ImageCapture(pixelWidth=pixelWidth, pixelHeight=pixelHeight)
         self.shutter = Button(PIN_SWITCH)
-        self.red_led = LED(PIN_RED_LED)
-        self.blue_led = LED(PIN_BLUE_LED)
-        self.green_led = LED(PIN_GREEN_LED)
         self.status = "ready"
+        self.handleLED()
 
         self.shutter.when_pressed = self.handleShutter
         # self.shutter.when_released = led.off
@@ -35,10 +39,10 @@ class CameraPrinter:
 
     def getStatus(self):
         printerStatus = self.printer.getStatus()
-        if printerStatus != "ready":
-            return printerStatus
-        else:
+        if self.status != "ready":
             return self.status
+        else:
+            return printerStatus
 
     def handleLED(self):
         status = self.getStatus()
@@ -64,3 +68,7 @@ class CameraPrinter:
         while self.daemon:
             self.handleLED()
             time.sleep(0.10)
+
+    def __del__(self):
+        self.status = "faulted"
+        self.handleLED()
