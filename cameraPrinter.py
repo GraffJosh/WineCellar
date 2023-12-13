@@ -35,6 +35,7 @@ class CameraPrinter:
         # self.shutter.when_released = led.off
 
     def captureAndPrint(self):
+        self.printer.print("\n")
         if not self.printer.printImage(self.camera.getNewImage()):
             self.status = "faulted"
         else:
