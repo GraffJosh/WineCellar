@@ -55,6 +55,10 @@ class MqttPrinter:
             self.bot.setMaxTokens(int(float(payload)))
         if self.config.DEVICE_STATUS_TOPIC == msg.topic:
             self.status = payload
+        if self.config.DISCOVER_TOPIC == msg.topic:
+            self.printerDiscover = payload
+            if "ip" in self.printerDiscover.keys():
+                self.printerIPAddress = self.printerDiscover["ip"]
         if self.config.BOT_STATUS_TOPIC == msg.topic:
             self.botStatusText = payload
 
@@ -199,7 +203,7 @@ class MqttPrinter:
         payload["density"] = "true"
         self.client.publish("printer/image", json.dumps(payload))
         time.sleep(2)
-        s.connect(("192.168.1.152", 8888))
+        s.connect((self.printerIPAddress, self.printerIPPort))
         for i in range(10):
             print("sending: ", len(bytes(line)), " bytes")
             s.sendall(bytes(line))
@@ -209,8 +213,17 @@ class MqttPrinter:
         self.socket.sendall(data)
 
     def connectToImageServer(self):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect(("192.168.1.152", 8888))
+        attempts = 0
+        while attempts < self.config.RETRIES_MAX:
+            attempts += 1
+            try:
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.socket.connect((self.printerIPAddress, self.printerIPPort))
+                return True
+            except BaseException as e:
+                print("connection to ", self.printerIPAddress, " failed for ", e)
+                time.sleep(5)
+        return False
 
     def configurePrinterForImage(self):
         payload = {}
@@ -223,6 +236,7 @@ class MqttPrinter:
         payload = {}
         payload["status"] = 0
         self.client.publish("printer/image", json.dumps(payload))
+        self.client.disconnect()
 
     def printImage(self, imageData):
         image = escposImage.EscposImage(imageData)
@@ -231,13 +245,15 @@ class MqttPrinter:
         image.center(512)
         self.configurePrinterForImage()
         time.sleep(1)
-        self.connectToImageServer()
-        i = 0
-        for line in image.to_column_format(True):
-            i = i + 1
-            self.sendImageBytesToServer(line)
-        time.sleep(i / 6)
-        self.printImageComplete()
+        if self.connectToImageServer():
+            i = 0
+            for line in image.to_column_format(True):
+                i = i + 1
+                self.sendImageBytesToServer(line)
+            time.sleep(i / 6)
+            self.printImageComplete()
+        else:
+            self.print("\n\n Printing Image Failed! Probably couldn't get the IP Address? Idk.")
 
     def print(self, inText):
         text = inText
@@ -284,7 +300,7 @@ class MqttPrinter:
         self.client.publish(self.config.BOT_STATUS_TOPIC, payload=status)
 
     def connect(self):
-        hosts = ["homeassistant.local", "192.168.1.103", "192.168.1.105"]
+        hosts = ["homeassistant.local", "192.168.1.103", "192.168.1.105", "localhost"]
         for host in hosts:
             try:
                 self.client.connect(host, 1883, 60)
@@ -317,9 +333,11 @@ class MqttPrinter:
         self.newPrompt = threading.Condition()
         self.line_length = self.config.PRINTER_CONFIGURATION["line_length"]
 
-        self.bot = robot.Robot()
-
+        self.printerIPAddress = self.config.DEFAULT_PRINTER_IP_ADDRESS
+        self.printerIPPort = self.config.DEFAULT_PRINTER_IP_PORT
         self.configurePrinter(self.config.PRINTER_CONFIGURATION)
+
+        self.bot = robot.Robot()
         # self.print("Client Online!")
         self.botQueueThread = threading.Thread(target=self.botQueue)
         self.botQueueThread.setDaemon(True)
