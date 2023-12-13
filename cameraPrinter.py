@@ -39,7 +39,8 @@ class CameraPrinter:
         self.status = status
 
     def getStatus(self):
-        printerStatus = self.printer.getStatus()
+        if self.printer:
+            printerStatus = self.printer.getStatus()
         if self.status != "ready":
             return self.status
         else:
