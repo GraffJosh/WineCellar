@@ -10,6 +10,7 @@ class ImageCapture:
         time.sleep(1)
         self.stream = io.BytesIO()
         self.video = video
+        self.cameraControls = {}
         if video:
             self.picam2 = Picamera2()
             config = self.picam2.create_preview_configuration(
@@ -26,6 +27,8 @@ class ImageCapture:
                 lores={"size": (pixelWidth, pixelHeight)},
                 display="lores",
             )
+            self.setCameraBrightness(1.25)
+            self.setCameraContrast(4)
             self.picam2.configure(capture_config)
 
         self.picam2.start()
@@ -35,6 +38,19 @@ class ImageCapture:
             self.frame_server = FrameServer(self.picam2)
             self.frame_server.start()
         # self.captureImage()
+
+    def setCameraBrightness(self, brightness):
+        self.picam2.controls.Brightness = brightness
+        # self.cameraControls["Brightness"] = brightness
+        # self.setControls()
+
+    def setCameraContrast(self, contrast):
+        self.picam2.controls.Constrast = contrast
+        # self.cameraControls["Contrast"] = contrast
+        # self.setControls()
+
+    # def setControls(self):
+    #     self.set_controls(self.cameraControls)
 
     def captureImage(self):
         if self.video:

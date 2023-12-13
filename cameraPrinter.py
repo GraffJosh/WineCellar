@@ -11,7 +11,7 @@ DEBUG = True
 
 
 class CameraPrinter:
-    def __init__(self, daemon=True, pixelWidth=512, pixelHeight=800, video=False) -> None:
+    def __init__(self, daemon=True, pixelWidth=1000, pixelHeight=512, video=False) -> None:
         self.daemon = daemon
         self.printer = mqttPrinter.MqttPrinter()
         self.camera = imageCapture.ImageCapture(pixelWidth=pixelWidth, pixelHeight=pixelHeight)
