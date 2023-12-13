@@ -1,6 +1,7 @@
 [Unit]
 Description=MQTT Printer Service
 After=multi-user.target
+After=network-online.target
 [Service]
 Type=simple
 User=joshgraff
