@@ -234,6 +234,7 @@ class MqttPrinter:
         self.client.publish("printer/image", json.dumps(payload))
 
     def printImageComplete(self):
+        print("printImageComplete")
         payload = {}
         payload["status"] = 0
         self.client.publish("printer/image", json.dumps(payload))

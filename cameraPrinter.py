@@ -34,6 +34,7 @@ class CameraPrinter:
             self.status = "faulted"
         else:
             self.status = "ready"
+        self.printer.cut()
 
     def setStatus(self, status):
         self.status = status
