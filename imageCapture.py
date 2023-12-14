@@ -29,8 +29,8 @@ class ImageCapture:
             )
         self.picam2.configure(config)
 
-        self.setCameraBrightness(1)
-        self.setCameraContrast(3)
+        # self.setCameraBrightness(1)
+        # self.setCameraContrast(3)
 
         self.picam2.start()
 
