@@ -308,7 +308,7 @@ class MqttPrinter:
     def botStatus(self, status):
         self.client.publish(self.config.BOT_STATUS_TOPIC, payload=status)
 
-    def getBotStatus(self, status):
+    def getBotStatus(self):
         return self.botStatusText
 
     def connect(self):
