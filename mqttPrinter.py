@@ -309,7 +309,11 @@ class MqttPrinter:
         self.client.publish(self.config.BOT_STATUS_TOPIC, payload=status)
 
     def getBotStatus(self):
-        return self.botStatusText
+        # @TODO: this is kinda gross.
+        if self.botStatusText:
+            return self.botStatusText
+        else:
+            self.botStatusText = "ready"
 
     def connect(self):
         hosts = ["homeassistant.local", "192.168.1.103", "192.168.1.105", "localhost"]
