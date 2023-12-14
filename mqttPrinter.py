@@ -123,6 +123,8 @@ class MqttPrinter:
             printTo = 0
             if "\n" in self.current_line:
                 printTo = self.current_line.find("\n")
+                if self.config.DEBUG_ENABLE:
+                    print(self.current_line[:printTo])
                 self.print(self.current_line[:printTo])
                 self.current_line = self.current_line[printTo + 1 :]
             if len(self.current_line) >= self.line_length:
@@ -130,6 +132,8 @@ class MqttPrinter:
                 printTo = self.current_line.rfind(" ", 0, self.line_length)
                 if printTo == -1:
                     printTo = self.line_length
+                if self.config.DEBUG_ENABLE:
+                    print(self.current_line[:printTo])
                 self.print(self.current_line[:printTo])
                 self.current_line = self.current_line[printTo + 1 :]
 
