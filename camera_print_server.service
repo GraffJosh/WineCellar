@@ -5,13 +5,12 @@ After=network-online.target
 [Service]
 Type=simple
 User=joshgraff
-ExecStartPre=/bin/sleep 10
 WorkingDirectory=/home/joshgraff/dev/WineCellar
 ExecStartPre=-/usr/bin/git pull
 Environment="PYTHONPATH=$PYTHONPATH:/home/dietpi/.local/lib/python3.10/site-packages"
 Restart=always
+RestartSec=10
 RuntimeMaxSec=2d
-RestartSec=5
 ExecStart=/home/joshgraff/dev/WineCellar/.venv/bin/python3 /home/joshgraff/dev/WineCellar/runMqttCameraPrinter.py
 [Install]
 WantedBy=multi-user.target
