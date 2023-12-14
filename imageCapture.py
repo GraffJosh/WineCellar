@@ -6,33 +6,33 @@ from frame_server import FrameServer
 
 
 class ImageCapture:
-    def __init__(self, pixelWidth=680, pixelHeight=512, video=False) -> None:
-        time.sleep(1)
+    def __init__(self, pixelWidth=800, pixelHeight=600, video=False) -> None:
         self.stream = io.BytesIO()
         self.video = video
         self.cameraControls = {}
-        if video:
-            self.picam2 = Picamera2()
+        self.frameHeight = pixelHeight
+        self.frameWidth = pixelWidth
+
+        self.picam2 = Picamera2()
+        if self.video:
             config = self.picam2.create_preview_configuration(
-                main={"size": (pixelWidth, pixelHeight)},
-                lores={"size": (pixelWidth, pixelHeight)},
+                main={"size": (self.frameWidth, self.frameHeight)},
+                lores={"size": (self.frameWidth, self.frameHeight)},
                 display="lores",
             )
             self.picam2.video_configuration.controls.FrameDurationLimits = (10000, 10000)
-            self.picam2.configure(config)
         else:
-            self.picam2 = Picamera2()
-            capture_config = self.picam2.create_still_configuration(
-                main={"size": (pixelWidth, pixelHeight)},
-                lores={"size": (pixelWidth, pixelHeight)},
+            config = self.picam2.create_still_configuration(
+                main={"size": (self.frameWidth, self.frameHeight)},
+                lores={"size": (self.frameWidth, self.frameHeight)},
                 display="lores",
             )
-            self.setCameraBrightness(1.25)
-            self.setCameraContrast(4)
-            self.picam2.configure(capture_config)
+        self.picam2.configure(config)
+
+        self.setCameraBrightness(1.25)
+        self.setCameraContrast(4)
 
         self.picam2.start()
-        time.sleep(2)
 
         if self.video:
             self.frame_server = FrameServer(self.picam2)
@@ -49,8 +49,21 @@ class ImageCapture:
         # self.cameraControls["Contrast"] = contrast
         # self.setControls()
 
-    # def setControls(self):
-    #     self.set_controls(self.cameraControls)
+    def setFrameSize(self, height=None, width=None):
+        if not height:
+            height = self.frameHeight
+        if not width:
+            width = self.frameWidth
+
+        self.frameHeight = height
+        self.frameWidth = width
+
+        if self.video:
+            self.picam2.video_configuration.size = (self.frameWidth, self.frameHeight)
+            self.picam2.configure("video")
+        else:
+            self.picam2.still_configuration.size = (self.frameWidth, self.frameHeight)
+            self.picam2.configure("still")
 
     def captureImage(self):
         if self.video:
