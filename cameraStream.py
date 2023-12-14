@@ -3,7 +3,7 @@
 # http://picamera.readthedocs.io/en/latest/recipes2.html#web-streaming
 
 import io
-import picamera
+import picamera2
 import logging
 import socketserver
 from threading import Condition
@@ -83,13 +83,21 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
     daemon_threads = True
 
 
-with picamera.PiCamera(resolution="640x480", framerate=24) as camera:
+with picamera2.Picamera2() as camera:
+    capture_config = camera.create_still_configuration(
+        main={"size": (640, 480)},
+        lores={"size": (640, 480)},
+        display="lores",
+        format="mjpeg",
+    )
+    camera.configure(capture_config)
     output = StreamingOutput()
     # Uncomment the next line to change your Pi's Camera rotation (in degrees)
     # camera.rotation = 90
-    camera.start_recording(output, format="mjpeg")
+    # start_recording(H264Encoder(), output=FfmpegOutput("-f rtp udp://192.168.168.110:9000"))
+    camera.start_recording(output=output)
     try:
-        address = ("", 8000)
+        address = ("", 80)
         server = StreamingServer(address, StreamingHandler)
         server.serve_forever()
     finally:
