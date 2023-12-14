@@ -66,7 +66,7 @@ class MqttPrinter:
             if self.config.DEBUG_ENABLE:
                 print("format and print!\n")
                 print(msg.payload)
-            self.printChunk(msg.payload)
+            self.printChunk(str(msg.payload))
 
     def getStatus(self):
         if self.status not in self.config.STATUS_OPTIONS:
