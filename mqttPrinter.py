@@ -62,6 +62,8 @@ class MqttPrinter:
                 self.printerIPAddress = self.printerDiscover["ip"]
         if self.config.BOT_STATUS_TOPIC == msg.topic:
             self.botStatusText = payload
+        if self.config.FORMAT_AND_PRINT_TOPIC == msg.topic:
+            self.printChunk(msg.payload)
 
     def getStatus(self):
         if self.status not in self.config.STATUS_OPTIONS:

@@ -11,6 +11,7 @@ RETRIES_MAX = 5
 PRINTER_CONFIGURATION = {"speed": 8, "line_length": 42, "autocut": 1}
 CONFIG_TOPIC = "printer/config"
 PRINT_TOPIC = "printer/printText"
+FORMAT_AND_PRINT_TOPIC = "printer/formatAndPrint"
 CUT_TOPIC = "printer/cut"
 FEED_TOPIC = "printer/feed"
 IMAGE_TOPIC = "printer/image"
