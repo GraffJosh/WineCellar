@@ -63,6 +63,9 @@ class MqttPrinter:
         if self.config.BOT_STATUS_TOPIC == msg.topic:
             self.botStatusText = payload
         if self.config.FORMAT_AND_PRINT_TOPIC == msg.topic:
+            if self.config.DEBUG_ENABLE:
+                print("format and print!\n")
+                print(msg.payload)
             self.printChunk(msg.payload)
 
     def getStatus(self):

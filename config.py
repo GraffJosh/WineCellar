@@ -3,6 +3,8 @@ HISTORY_TIMEOUT = 600
 INITIAL_MESSAGE = "you are a helpful printer, prioritize: formatting, syntax, and appeal"
 MAX_TOKENS = 200
 TIMEOUT = 60
+DEBUG_ENABLE = True
+
 
 PRINTER_DEVICE_NAME = "printer"
 DEFAULT_PRINTER_IP_ADDRESS = "192.168.1.152"
