@@ -6,7 +6,7 @@ from frame_server import FrameServer
 
 
 class ImageCapture:
-    def __init__(self, pixelWidth=640, pixelHeight=480, video=False) -> None:
+    def __init__(self, pixelWidth=680, pixelHeight=512, video=False) -> None:
         time.sleep(1)
         self.stream = io.BytesIO()
         self.video = video
