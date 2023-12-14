@@ -85,8 +85,8 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
 
 with picamera2.Picamera2() as camera:
     capture_config = camera.create_video_configuration(
-        main={"size": (640, 480), "format": "mjpeg"},
-        lores={"size": (640, 480), "format": "mjpeg"},
+        main={"size": (640, 480), "format": "YUV420"},
+        lores={"size": (640, 480), "format": "YUV420"},
         display="lores",
     )
     camera.configure(capture_config)
