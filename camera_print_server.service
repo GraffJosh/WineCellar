@@ -8,9 +8,9 @@ User=joshgraff
 WorkingDirectory=/home/joshgraff/dev/WineCellar
 ExecStartPre=-/usr/bin/git pull
 Environment="PYTHONPATH=$PYTHONPATH:/home/dietpi/.local/lib/python3.10/site-packages"
-Restart=always
-RestartSec=10
 RuntimeMaxSec=2d
 ExecStart=/home/joshgraff/dev/WineCellar/.venv/bin/python3 /home/joshgraff/dev/WineCellar/runMqttCameraPrinter.py
+Restart=always
+RestartSec=10
 [Install]
 WantedBy=multi-user.target
