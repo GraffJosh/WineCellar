@@ -60,6 +60,15 @@ class Robot:
     def getLastResponse(self):
         return self.last_response
 
+    def addContext(self, context):
+        self.conversationHistory.append(
+            {
+                "role": "user",
+                "content": "{}".format(context),
+            },
+        )
+        # self.conversationHistory.append(context)
+
     def resetConversation(self):
         self.conversationHistory.clear()
 

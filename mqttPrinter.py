@@ -40,7 +40,10 @@ class MqttPrinter:
         payload = msg.payload.decode(encoding="utf-8", errors="strict")
         if self.config.DEBUG_ENABLE:
             print(msg.topic + " " + payload)
-        if self.config.COMPLETION_TOPIC == msg.topic:
+        if self.config.BOT_CONTEXT_TOPIC == msg.topic:
+            self.bot.addContext(payload)
+
+        if self.config.BOT_COMPLETION_TOPIC == msg.topic:
             with self.newPrompt:
                 json_payload = json.loads(payload)
                 if "cut" in json_payload.keys():
