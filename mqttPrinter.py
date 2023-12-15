@@ -127,6 +127,7 @@ class MqttPrinter:
                     print(self.current_line[:printTo])
                 self.print(self.current_line[:printTo])
                 self.current_line = self.current_line[printTo + 1 :]
+                continue
             if len(self.current_line) >= self.line_length:
                 # printTo = self.line_length
                 printTo = self.current_line.rfind(" ", 0, self.line_length)
@@ -136,6 +137,7 @@ class MqttPrinter:
                     print(self.current_line[:printTo])
                 self.print(self.current_line[:printTo])
                 self.current_line = self.current_line[printTo + 1 :]
+                continue
 
     def printChars(self, chars):
         payload = {}
