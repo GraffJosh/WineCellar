@@ -76,7 +76,7 @@ class Robot:
                 print("History Timeout: resetting history")
                 self.conversationHistory.clear()
             else:
-                print("History active, entries: ", self.conversationHistory.count())
+                pass
         else:
             self.conversationHistory.clear()
         self.lastRequestTime = time.time()
