@@ -298,8 +298,8 @@ class MqttPrinter:
         self.client.publish(self.config.CUT_TOPIC, str({"cut": "True"}))
 
     def feed(self, inLength=0):
-        self.print()
-        self.client.publish(self.config.FEED_TOPIC, str({"length": inLength}))
+        self.print("")
+        self.client.publish(self.config.FEED_TOPIC, str({"length": inLength - 1}))
 
     def configurePrinter(self, inConfig={}):
         for key, value in inConfig.items():
