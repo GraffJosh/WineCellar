@@ -38,7 +38,8 @@ class MqttPrinter:
     def on_message(self, client, userdata, msg):
         # topic = msg.topic.split("/")
         payload = msg.payload.decode(encoding="utf-8", errors="strict")
-        print(msg.topic + " " + payload)
+        if self.config.DEBUG_ENABLE:
+            print(msg.topic + " " + payload)
         if self.config.COMPLETION_TOPIC == msg.topic:
             with self.newPrompt:
                 json_payload = json.loads(payload)
@@ -52,7 +53,8 @@ class MqttPrinter:
         #     self.print(str(msg.payload))
 
         if self.config.MAX_TOKENS_TOPIC == msg.topic:
-            print(payload)
+            if self.config.DEBUG_ENABLE:
+                print(payload)
             self.bot.setMaxTokens(int(float(payload)))
         if self.config.DEVICE_STATUS_TOPIC == msg.topic:
             self.status = payload
@@ -67,6 +69,9 @@ class MqttPrinter:
                 print("format and print!\n")
                 print(msg.payload)
             self.printChunk(inText=payload)
+            # @TODO: this is a jank workaround. Refactor print chunk into chunker and formatter.
+            if len(self.current_line):
+                self.print(self.current_line)
 
     def getStatus(self):
         if self.status not in self.config.STATUS_OPTIONS:
@@ -98,24 +103,7 @@ class MqttPrinter:
     def setTextWidth(self, width):
         self.textWidth = width
 
-    # def printImage(self, filename):
-    #     image = Image.open(filename)
-    #     image.convert(mode="L", dither=3)
-    #     pix = np.array(image)
-    #     pix = np.delete(pix, 0, 2)
-    #     pix = np.delete(pix, 0, 2)
-    #     pix = np.delete(pix, 0, 2)
-
-    #     # pix = pix.reshape(600, 600)
-    #     width = pix.shape[0]
-    #     height = pix.shape[1]
-    #     pix = pix.flatten()
-    #     image_bytes = pix.tobytes("C")
-    #     self.client.publish(
-    #         self.config.IMAGE_TOPIC,
-    #         payload=str({"image": image_bytes, "width": width, "height": height}),
-    #     )
-
+    # @TODO: this is a jank workaround. Refactor print chunk into chunker and formatter.
     def printChunk(self, inText=""):
         self.current_line += inText
         while ("\n" in self.current_line) or (len(self.current_line) >= self.line_length):
@@ -307,6 +295,7 @@ class MqttPrinter:
         self.client.publish(self.config.CUT_TOPIC, str({"cut": "True"}))
 
     def feed(self, inLength=0):
+        self.print()
         self.client.publish(self.config.FEED_TOPIC, str({"length": inLength}))
 
     def configurePrinter(self, inConfig={}):
