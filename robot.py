@@ -61,6 +61,7 @@ class Robot:
         return self.last_response
 
     def addContext(self, context):
+        self.resetConversation(autoReset=True)
         self.conversationHistory.append(
             {
                 "role": "user",
@@ -69,8 +70,16 @@ class Robot:
         )
         # self.conversationHistory.append(context)
 
-    def resetConversation(self):
-        self.conversationHistory.clear()
+    def resetConversation(self, autoReset=False):
+        if autoReset:
+            if time.time() - self.lastRequestTime > self.historyTimeout:
+                print("History Timeout: resetting history")
+                self.conversationHistory.clear()
+            else:
+                print("History active, entries: ", self.conversationHistory.count())
+        else:
+            self.conversationHistory.clear()
+        self.lastRequestTime = time.time()
 
     def getReview(self, inMessages):
         if list(inMessages.keys())[0] not in list(self.reviews.keys()):
@@ -87,12 +96,7 @@ class Robot:
     def sendRequest(self, inMessages=[]):
         response = "Sorry, I don't know about that!"
         response_status = False
-        if time.time() - self.lastRequestTime > self.historyTimeout:
-            print("History Timeout: resetting history")
-            self.resetConversation()
-        else:
-            print("History active, entries: ", self.conversationHistory.count())
-        self.lastRequestTime = time.time()
+        self.resetConversation(autoReset=True)
         try:
             print(inMessages)
             completion = self.client.chat.completions.create(
@@ -116,10 +120,7 @@ class Robot:
         response = {}
         response["status"] = False
         response["response"] = ""
-        if time.time() - self.lastRequestTime > self.historyTimeout:
-            print("History Timeout: resetting history")
-            self.resetConversation()
-        self.lastRequestTime = time.time()
+        self.resetConversation(autoReset=True)
         if inStatusFunction:
             inStatusFunction("generating")
         try:
