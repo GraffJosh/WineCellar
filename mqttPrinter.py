@@ -40,33 +40,30 @@ class MqttPrinter:
         payload = msg.payload.decode(encoding="utf-8", errors="strict")
         if self.config.DEBUG_ENABLE:
             print(msg.topic + " " + payload)
-        if self.config.BOT_CONTEXT_TOPIC == msg.topic:
-            self.bot.addContext(payload)
+        if self.bot:
+            if self.config.BOT_CONTEXT_TOPIC == msg.topic:
+                self.bot.addContext(payload)
 
-        if self.config.BOT_COMPLETION_TOPIC == msg.topic:
-            with self.newPrompt:
-                json_payload = json.loads(payload)
-                if "cut" in json_payload.keys():
-                    self.autoCut = bool(json_payload["cut"])
-                if "prompt" in json_payload.keys():
-                    self.promptsQueue.put(str(json_payload["prompt"]))
-                    self.newPrompt.notify()
-
-        # if "printText" == msg.topic:
-        #     self.print(str(msg.payload))
-
-        if self.config.MAX_TOKENS_TOPIC == msg.topic:
-            if self.config.DEBUG_ENABLE:
-                print(payload)
-            self.bot.setMaxTokens(int(float(payload)))
+            if self.config.BOT_COMPLETION_TOPIC == msg.topic:
+                with self.newPrompt:
+                    json_payload = json.loads(payload)
+                    if "cut" in json_payload.keys():
+                        self.autoCut = bool(json_payload["cut"])
+                    if "prompt" in json_payload.keys():
+                        self.promptsQueue.put(str(json_payload["prompt"]))
+                        self.newPrompt.notify()
+            if self.config.MAX_TOKENS_TOPIC == msg.topic:
+                if self.config.DEBUG_ENABLE:
+                    print(payload)
+                self.bot.setMaxTokens(int(float(payload)))
+            if self.config.BOT_STATUS_TOPIC == msg.topic:
+                self.botStatusText = payload
         if self.config.DEVICE_STATUS_TOPIC == msg.topic:
             self.status = payload
         if self.config.DISCOVER_TOPIC == msg.topic:
             self.printerDiscover = json.loads(payload)
             if "ip" in self.printerDiscover.keys():
                 self.printerIPAddress = self.printerDiscover["ip"]
-        if self.config.BOT_STATUS_TOPIC == msg.topic:
-            self.botStatusText = payload
         if self.config.FORMAT_AND_PRINT_TOPIC == msg.topic:
             if self.config.DEBUG_ENABLE:
                 print("format and print!\n")
@@ -80,7 +77,7 @@ class MqttPrinter:
         if self.status not in self.config.STATUS_OPTIONS:
             return "faulted"
         else:
-            if self.getBotStatus() == "generating":
+            if self.bot and self.getBotStatus() == "generating":
                 self.status = "generating"
             return self.status
 
@@ -230,7 +227,13 @@ class MqttPrinter:
                 continue
 
     def __init__(
-        self, daemon=False, inConfig="config", inKeys="keys", inPrintTopic="", inConfigTopic=""
+        self,
+        daemon=False,
+        inRobot=None,
+        inConfig="config",
+        inKeys="keys",
+        inPrintTopic="",
+        inConfigTopic="",
     ) -> None:
         self.config = __import__(inConfig)
         self.keys = __import__(inKeys)
@@ -258,12 +261,14 @@ class MqttPrinter:
         self.printerIPPort = self.config.DEFAULT_PRINTER_IP_PORT
         self.configurePrinter(self.config.PRINTER_CONFIGURATION)
 
-        self.bot = robot.Robot()
-        self.botStatusText = "ready"  # @TODO: this is kinda gross.
-        # self.print("Client Online!")
-        self.botQueueThread = threading.Thread(target=self.botQueue)
-        self.botQueueThread.setDaemon(True)
-        self.botQueueThread.start()
+        self.bot = None
+        if inRobot:
+            self.bot = inRobot  # robot.Robot()
+            self.botStatusText = "ready"  # @TODO: this is kinda gross.
+            # self.print("Client Online!")
+            self.botQueueThread = threading.Thread(target=self.botQueue)
+            self.botQueueThread.setDaemon(True)
+            self.botQueueThread.start()
         if daemon:
             self.client.loop_forever()
         else:
@@ -272,4 +277,5 @@ class MqttPrinter:
     def __del__(self):
         if self.client:
             self.client.loop_stop()
-        self.botQueueThread.join()
+        if self.bot:
+            self.botQueueThread.join()

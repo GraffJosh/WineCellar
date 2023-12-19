@@ -1,2 +1,5 @@
 import mqttPrinter
-printer=mqttPrinter.MqttPrinter(daemon=True)
+import robot
+
+robot = robot.Robot()
+printer = mqttPrinter.MqttPrinter(daemon=True, inRobot=robot)
