@@ -3,8 +3,8 @@ import time
 
 PIN_RED_LED = 14
 PIN_BLUE_LED = 15
-PIN_GREEN_LED = 18
-PIN_SWITCH = 23
+PIN_GREEN_LED = 23
+PIN_SWITCH = 24
 red_led = LED(PIN_RED_LED)
 red_led.on()
 
