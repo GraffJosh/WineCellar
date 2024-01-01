@@ -43,7 +43,7 @@ class CameraPrinter:
         self.printer.cut()
 
     def printReceipt(self):
-        self.printer.print("\n")
+        #self.printer.print("\n")
         # if not self.printer.printImage(self.camera.getNewImage()):
         #     self.status = "faulted"
         # else:
