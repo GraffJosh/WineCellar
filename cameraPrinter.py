@@ -48,7 +48,7 @@ class CameraPrinter:
         #     self.status = "faulted"
         # else:
         #     self.status = "ready"
-        self.printer.print(
+        self.printer.printChunk(
             "Thank you for visiting JPG Industries!\r\nCome Again Soon!\r\n------------------------------------------\r\n ORDER C10         AA008763         18:42\r\n------------------------------------------\r\n\r\n\r\nBeverage: unknown              $nan\r\nBeverage: unknown              $nan\r\n            total: $nan\r\n"
         )
         self.printer.requestCompletion("wish me a happy new years in a new and interesing way")
