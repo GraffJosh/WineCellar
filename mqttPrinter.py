@@ -33,10 +33,12 @@ class MqttPrinter:
         self.status = "faulted"
         time.sleep(5)
         self.client.reconnect()
-    def requestCompletion(self,prompt):
+
+    def requestCompletion(self, prompt):
         with self.newPrompt:
-            self.promptsQueue.put(str(prompt))
+            self.promptsQueue.put(prompt)
             self.newPrompt.notify()
+
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg):
         # topic = msg.topic.split("/")
