@@ -27,6 +27,7 @@ class ImageCapture:
                 lores={"size": (self.frameWidth, self.frameHeight)},
                 display="lores",
             )
+            self.picam2.set_controls({"AeExposureMode": config.controls.AeExposureModeEnum.Short})
         self.picam2.configure(config)
 
         # self.setCameraBrightness(1)
@@ -66,6 +67,7 @@ class ImageCapture:
             self.picam2.configure("still")
 
     def captureImage(self):
+        success = self.picam2.autofocus_cycle()
         if self.video:
             buffer = self.frame_server.wait_for_frame()
             self.last_image = self.picam2.helpers.make_image(
