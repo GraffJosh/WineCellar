@@ -43,7 +43,7 @@ class CameraPrinter:
         self.printer.cut()
 
     def printReceipt(self):
-        #self.printer.print("\n")
+        # self.printer.print("\n")
         # if not self.printer.printImage(self.camera.getNewImage()):
         #     self.status = "faulted"
         # else:
@@ -52,7 +52,8 @@ class CameraPrinter:
         #     "Thank you for visiting JPG Industries!\r\nCome Again Soon!\r\n------------------------------------------\r\n ORDER C10         AA008763         18:42\r\n------------------------------------------\r\n\r\n\r\nBeverage: unknown              $nan\r\nBeverage: unknown              $nan\r\n            total: $nan\r\n"
         # )
         self.printer.requestCompletion("wish me a happy new years in a new and interesing way")
-       # self.printer.cut()
+
+    # self.printer.cut()
 
     def setStatus(self, status):
         self.status = status
@@ -83,7 +84,7 @@ class CameraPrinter:
     def handleShutter(self) -> None:
         if DEBUG:
             print("Handle Shutter!")
-        self.printReceipt()
+        self.captureAndPrint()
 
     def loop(self):
         while self.daemon:
