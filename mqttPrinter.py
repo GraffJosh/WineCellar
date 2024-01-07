@@ -174,8 +174,8 @@ class MqttPrinter:
     def printImage(self, imageData, imageWidth, imageHeight):
         image = escposImage.EscposImage(imageData)
         image.auto_rotate()
-        image.fit_width(1536)
-        image.center(1536)
+        image.fit_width(512)
+        image.center(512)
         self.configurePrinterForImage(imageWidth, imageHeight)
         time.sleep(1)
         if self.connectToImageServer():
