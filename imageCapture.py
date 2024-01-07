@@ -3,6 +3,7 @@ import io
 from picamera2 import Picamera2, Preview
 from PIL import Image
 from frame_server import FrameServer
+from libcamera import controls
 
 
 class ImageCapture:
@@ -29,9 +30,9 @@ class ImageCapture:
             )
             self.picam2.set_controls(
                 {
-                    "AeExposureMode": config.controls.AeExposureModeEnum.Short,
+                    "AeExposureMode": controls.AeExposureModeEnum.Short,
                     "AeEnable": True,
-                    "AfMode": config.controls.AfModeEnum.Auto,
+                    "AfMode": controls.AfModeEnum.Auto,
                 }
             )
         self.picam2.configure(config)
