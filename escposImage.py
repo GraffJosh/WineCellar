@@ -74,6 +74,7 @@ class EscposImage(object):
         pass
 
     def auto_rotate(self):
+        self._im = self._im.rotate(180, Image.NEAREST, expand=1)
         if self.width > self.height:
             self.set_horizontal()
 

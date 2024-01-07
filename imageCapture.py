@@ -27,7 +27,13 @@ class ImageCapture:
                 lores={"size": (self.frameWidth, self.frameHeight)},
                 display="lores",
             )
-            self.picam2.set_controls({"AeExposureMode": config.controls.AeExposureModeEnum.Short})
+            self.picam2.set_controls(
+                {
+                    "AeExposureMode": config.controls.AeExposureModeEnum.Short,
+                    "AeEnable": True,
+                    "AfMode": config.controls.AfModeEnum.Auto,
+                }
+            )
         self.picam2.configure(config)
 
         # self.setCameraBrightness(1)
