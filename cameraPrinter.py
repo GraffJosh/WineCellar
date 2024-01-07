@@ -37,8 +37,9 @@ class CameraPrinter:
     def captureAndPrint(self):
         self.printer.print("\n")
         image = self.camera.getNewImage()
-
-        if not self.printer.printImage(image):
+        self.camera.frameHeight
+        self.camera.frameWidth
+        if not self.printer.printImage(image, self.camera.frameWidth, self.camera.frameHeight):
             self.status = "faulted"
         else:
             self.status = "ready"

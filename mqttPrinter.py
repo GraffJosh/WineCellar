@@ -156,9 +156,10 @@ class MqttPrinter:
     def disconnectFromImageServer(self):
         self.socket.close()
 
-    def configurePrinterForImage(self):
+    def configurePrinterForImage(self, imageWidth, imageHeight):
         payload = {}
         payload["width"] = 512
+        payload["height"] = imageHeight
         payload["density"] = "true"
         payload["status"] = 1
         self.client.publish("printer/image", json.dumps(payload))
@@ -170,12 +171,12 @@ class MqttPrinter:
         self.client.publish("printer/image", json.dumps(payload))
         self.disconnectFromImageServer()
 
-    def printImage(self, imageData):
+    def printImage(self, imageData, imageWidth, imageHeight):
         image = escposImage.EscposImage(imageData)
         image.auto_rotate()
-        image.fit_width(512)
-        image.center(512)
-        self.configurePrinterForImage()
+        image.fit_width(1536)
+        image.center(1536)
+        self.configurePrinterForImage(imageWidth, imageHeight)
         time.sleep(1)
         if self.connectToImageServer():
             i = 0
