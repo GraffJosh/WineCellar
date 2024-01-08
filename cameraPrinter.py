@@ -27,7 +27,7 @@ class CameraPrinter:
         self.daemon = daemon
         self.printer = mqttPrinter.MqttPrinter()
         self.camera = imageCapture.ImageCapture(pixelWidth=pixelWidth, pixelHeight=pixelHeight)
-        self.shutter = Button(PIN_SWITCH)
+        self.shutter = Button(PIN_SWITCH, bounce_time=0.1)
         self.status = "ready"
         self.handleLED()
 
