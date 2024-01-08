@@ -32,6 +32,7 @@ class CameraPrinter:
         self.handleLED()
 
         self.shutter.when_pressed = self.handleShutter
+        self.shutter.when_held = self.handleShutterHeld
         # self.shutter.when_released = led.off
 
     def captureAndPrint(self):
@@ -54,7 +55,7 @@ class CameraPrinter:
         # self.printer.printChunk(
         #     "Thank you for visiting JPG Industries!\r\nCome Again Soon!\r\n------------------------------------------\r\n ORDER C10         AA008763         18:42\r\n------------------------------------------\r\n\r\n\r\nBeverage: unknown              $nan\r\nBeverage: unknown              $nan\r\n            total: $nan\r\n"
         # )
-        self.printer.requestCompletion("wish me a happy new years in a new and interesing way")
+        self.printer.requestCompletion("Tell me what you are")
 
     # self.printer.cut()
 
@@ -88,6 +89,11 @@ class CameraPrinter:
         if DEBUG:
             print("Handle Shutter!")
         self.captureAndPrint()
+
+    def handleShutterHeld(self) -> None:
+        if DEBUG:
+            print("Handle Shutter!")
+        self.printReceipt()
 
     def loop(self):
         while self.daemon:
