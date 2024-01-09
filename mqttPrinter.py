@@ -271,7 +271,8 @@ class MqttPrinter:
 
         self.bot = None
         if not inRobot:
-            inRobot = robot.Robot()
+            pass
+            # inRobot = robot.Robot()
         if inRobot:
             self.bot = inRobot  # robot.Robot()
             self.botStatusText = "ready"  # @TODO: this is kinda gross.
