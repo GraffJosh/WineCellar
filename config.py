@@ -13,6 +13,7 @@ RETRIES_MAX = 5
 PRINTER_CONFIGURATION = {"speed": 8, "line_length": 42, "autocut": 1}
 BOT_COMPLETION_TOPIC = "robot/requestCompletion"
 BOT_CONTEXT_TOPIC = "robot/addContext"
+BOT_RESET_TOPIC = "robot/resetConversation"
 BOT_STATUS_TOPIC = "robot/botStatus"
 MAX_TOKENS_TOPIC = "robot/setMaxTokens"
 CONFIG_TOPIC = "printer/config"
@@ -30,6 +31,7 @@ SUBSCRIBE_TOPICS = [
     BOT_COMPLETION_TOPIC,
     BOT_STATUS_TOPIC,
     BOT_CONTEXT_TOPIC,
+    BOT_RESET_TOPIC,
     FORMAT_AND_PRINT_TOPIC,
     DEVICE_STATUS_TOPIC,
     DEVICE_ADDRESS_TOPIC,

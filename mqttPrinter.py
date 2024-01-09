@@ -49,6 +49,8 @@ class MqttPrinter:
             if self.config.BOT_CONTEXT_TOPIC == msg.topic:
                 self.bot.addContext(payload)
 
+            if self.config.BOT_RESET_TOPIC == msg.topic:
+                self.bot.resetConversation()
             if self.config.BOT_COMPLETION_TOPIC == msg.topic:
                 with self.newPrompt:
                     json_payload = json.loads(payload)
