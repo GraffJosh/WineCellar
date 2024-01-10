@@ -15,6 +15,7 @@ BOT_COMPLETION_TOPIC = "robot/requestCompletion"
 BOT_CONTEXT_TOPIC = "robot/addContext"
 BOT_RESET_TOPIC = "robot/resetConversation"
 BOT_STATUS_TOPIC = "robot/botStatus"
+BOT_URL_IMAGE_TOPIC = "robot/webImage"
 MAX_TOKENS_TOPIC = "robot/setMaxTokens"
 CONFIG_TOPIC = "printer/config"
 PRINT_TOPIC = "printer/printText"
@@ -32,6 +33,7 @@ SUBSCRIBE_TOPICS = [
     BOT_STATUS_TOPIC,
     BOT_CONTEXT_TOPIC,
     BOT_RESET_TOPIC,
+    BOT_URL_IMAGE_TOPIC,
     FORMAT_AND_PRINT_TOPIC,
     DEVICE_STATUS_TOPIC,
     DEVICE_ADDRESS_TOPIC,

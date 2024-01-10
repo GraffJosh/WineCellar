@@ -1,11 +1,11 @@
 import paho.mqtt.client as mqtt
+import requests
+from io import BytesIO
 import time
 import numpy as np
-import textwrap
 import threading
 import queue
-import struct
-from PIL import Image
+from PIL import Image, ImageOps
 import json
 import robot
 import escposImage
@@ -43,6 +43,10 @@ class MqttPrinter:
     def on_message(self, client, userdata, msg):
         # topic = msg.topic.split("/")
         payload = msg.payload.decode(encoding="utf-8", errors="strict")
+        try:
+            json_payload = json.loads(payload)
+        except:
+            json_payload = None
         if self.config.DEBUG_ENABLE:
             print(msg.topic + " " + payload)
         if self.bot:
@@ -53,24 +57,23 @@ class MqttPrinter:
                 self.bot.resetConversation()
             if self.config.BOT_COMPLETION_TOPIC == msg.topic:
                 with self.newPrompt:
-                    json_payload = json.loads(payload)
+                    # json_payload = json.loads(payload)
                     if "cut" in json_payload.keys():
                         self.autoCut = bool(json_payload["cut"])
                     if "prompt" in json_payload.keys():
                         self.promptsQueue.put(str(json_payload["prompt"]))
                         self.newPrompt.notify()
+            if self.config.BOT_URL_IMAGE_TOPIC == msg.topic:
+                self.printWebImage(payload)
             if self.config.MAX_TOKENS_TOPIC == msg.topic:
-                if self.config.DEBUG_ENABLE:
-                    print(payload)
                 self.bot.setMaxTokens(int(float(payload)))
             if self.config.BOT_STATUS_TOPIC == msg.topic:
                 self.botStatusText = payload
         if self.config.DEVICE_STATUS_TOPIC == msg.topic:
             self.status = payload
         if self.config.DISCOVER_TOPIC == msg.topic:
-            self.printerDiscover = json.loads(payload)
-            if "ip" in self.printerDiscover.keys():
-                self.printerIPAddress = self.printerDiscover["ip"]
+            if "ip" in json_payload.keys():
+                self.printerIPAddress = json_payload["ip"]
         if self.config.FORMAT_AND_PRINT_TOPIC == msg.topic:
             if self.config.DEBUG_ENABLE:
                 print("format and print!\n")
@@ -154,6 +157,15 @@ class MqttPrinter:
                 print("connection to ", self.printerIPAddress, " failed for ", e)
                 time.sleep(5)
         return False
+
+    def printWebImage(self, url):
+        response = requests.get(url)
+        img = Image.open(BytesIO(response.content))
+        img = img.rotate(180)
+        print(img)
+        # img = ImageOps.contain(img, (512, 2048))
+        # img.thumbnail((512, 5000), Image.ADAPTIVE)
+        self.printImage(img, img.width, img.height)
 
     def disconnectFromImageServer(self):
         self.socket.close()
