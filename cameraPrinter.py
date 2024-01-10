@@ -16,7 +16,7 @@ import mqttPrinter
 
 
 class CameraPrinter:
-    def __init__(self, daemon=True, pixelWidth=680, pixelHeight=512, video=False) -> None:
+    def __init__(self, daemon=True, pixelWidth=512, pixelHeight=512, video=False) -> None:
         self.red_led = red_led
         self.blue_led = LED(PIN_BLUE_LED)
         self.green_led = LED(PIN_GREEN_LED)
@@ -33,6 +33,8 @@ class CameraPrinter:
 
         self.shutter.when_pressed = self.handleShutter
         self.shutter.when_held = self.handleShutterHeld
+        if self.daemon:
+            self.loop()
         # self.shutter.when_released = led.off
 
     def captureAndPrint(self):

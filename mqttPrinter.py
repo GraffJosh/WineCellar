@@ -75,19 +75,19 @@ class MqttPrinter:
                     self.botStatusText = payload
                 if self.config.BOT_URL_IMAGE_TOPIC == msg.topic:
                     self.requestImage(self.getWebImage(url=payload))
+                if self.config.FORMAT_AND_PRINT_TOPIC == msg.topic:
+                    if self.config.DEBUG_ENABLE:
+                        print("format and print!\n")
+                        print(msg.payload)
+                    self.printChunk(inText=payload)
+                    # @TODO: this is a jank workaround. Refactor print chunk into chunker and formatter.
+                    if len(self.current_line):
+                        self.print(self.current_line)
             if self.config.DEVICE_STATUS_TOPIC == msg.topic:
                 self.status = payload
             if self.config.DISCOVER_TOPIC == msg.topic:
                 if "ip" in json_payload.keys():
                     self.printerIPAddress = json_payload["ip"]
-            if self.config.FORMAT_AND_PRINT_TOPIC == msg.topic:
-                if self.config.DEBUG_ENABLE:
-                    print("format and print!\n")
-                    print(msg.payload)
-                self.printChunk(inText=payload)
-                # @TODO: this is a jank workaround. Refactor print chunk into chunker and formatter.
-                if len(self.current_line):
-                    self.print(self.current_line)
         except TypeError as e:
             # if we get a type error, we probably were expecting json and got string.
             # Don't crash, just wait for the next message.
