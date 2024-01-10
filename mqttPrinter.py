@@ -39,6 +39,11 @@ class MqttPrinter:
             self.promptsQueue.put(prompt)
             self.newPrompt.notify()
 
+    def requestImage(self, image):
+        with self.newPrompt:
+            self.imageQueue.put(image)
+            self.newPrompt.notify()
+
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg):
         # topic = msg.topic.split("/")
@@ -49,39 +54,44 @@ class MqttPrinter:
             json_payload = None
         if self.config.DEBUG_ENABLE:
             print(msg.topic + " " + payload)
-        if self.bot:
-            if self.config.BOT_CONTEXT_TOPIC == msg.topic:
-                self.bot.addContext(payload)
+        try:
+            if self.bot:
+                if self.config.BOT_CONTEXT_TOPIC == msg.topic:
+                    self.bot.addContext(payload)
 
-            if self.config.BOT_RESET_TOPIC == msg.topic:
-                self.bot.resetConversation()
-            if self.config.BOT_COMPLETION_TOPIC == msg.topic:
-                with self.newPrompt:
-                    # json_payload = json.loads(payload)
-                    if "cut" in json_payload.keys():
-                        self.autoCut = bool(json_payload["cut"])
-                    if "prompt" in json_payload.keys():
-                        self.promptsQueue.put(str(json_payload["prompt"]))
-                        self.newPrompt.notify()
-            if self.config.BOT_URL_IMAGE_TOPIC == msg.topic:
-                self.printWebImage(payload)
-            if self.config.MAX_TOKENS_TOPIC == msg.topic:
-                self.bot.setMaxTokens(int(float(payload)))
-            if self.config.BOT_STATUS_TOPIC == msg.topic:
-                self.botStatusText = payload
-        if self.config.DEVICE_STATUS_TOPIC == msg.topic:
-            self.status = payload
-        if self.config.DISCOVER_TOPIC == msg.topic:
-            if "ip" in json_payload.keys():
-                self.printerIPAddress = json_payload["ip"]
-        if self.config.FORMAT_AND_PRINT_TOPIC == msg.topic:
-            if self.config.DEBUG_ENABLE:
-                print("format and print!\n")
-                print(msg.payload)
-            self.printChunk(inText=payload)
-            # @TODO: this is a jank workaround. Refactor print chunk into chunker and formatter.
-            if len(self.current_line):
-                self.print(self.current_line)
+                if self.config.BOT_RESET_TOPIC == msg.topic:
+                    self.bot.resetConversation()
+                if self.config.BOT_COMPLETION_TOPIC == msg.topic:
+                    with self.newPrompt:
+                        # json_payload = json.loads(payload)
+                        if "cut" in json_payload.keys():
+                            self.autoCut = bool(json_payload["cut"])
+                        if "prompt" in json_payload.keys():
+                            self.promptsQueue.put(str(json_payload["prompt"]))
+                            self.newPrompt.notify()
+                if self.config.MAX_TOKENS_TOPIC == msg.topic:
+                    self.bot.setMaxTokens(int(float(payload)))
+                if self.config.BOT_STATUS_TOPIC == msg.topic:
+                    self.botStatusText = payload
+                if self.config.BOT_URL_IMAGE_TOPIC == msg.topic:
+                    self.requestImage(self.getWebImage(url=payload))
+            if self.config.DEVICE_STATUS_TOPIC == msg.topic:
+                self.status = payload
+            if self.config.DISCOVER_TOPIC == msg.topic:
+                if "ip" in json_payload.keys():
+                    self.printerIPAddress = json_payload["ip"]
+            if self.config.FORMAT_AND_PRINT_TOPIC == msg.topic:
+                if self.config.DEBUG_ENABLE:
+                    print("format and print!\n")
+                    print(msg.payload)
+                self.printChunk(inText=payload)
+                # @TODO: this is a jank workaround. Refactor print chunk into chunker and formatter.
+                if len(self.current_line):
+                    self.print(self.current_line)
+        except TypeError as e:
+            # if we get a type error, we probably were expecting json and got string.
+            # Don't crash, just wait for the next message.
+            pass
 
     def getStatus(self):
         if self.status not in self.config.STATUS_OPTIONS:
@@ -102,6 +112,10 @@ class MqttPrinter:
                         inPrintFunction=self.printChunk,
                         inStatusFunction=self.botStatus,
                     )
+                    if self.autoCut:
+                        self.cut()
+                if not self.imageQueue.empty():
+                    self.printImage(self.imageQueue.get())
                     if self.autoCut:
                         self.cut()
                 self.newPrompt.wait()
@@ -142,6 +156,13 @@ class MqttPrinter:
         payload["length"] = len(payload["chars"])
         self.client.publish("printer/chars", json.dumps(payload))
 
+    def getWebImage(self, url):
+        print("URL: ", '"', url.strip(), '"')
+        response = requests.get(url.strip())
+        img = Image.open(BytesIO(response.content))
+        img = img.rotate(180)
+        return img
+
     def sendImageBytesToServer(self, data):
         self.socket.sendall(data)
 
@@ -158,21 +179,12 @@ class MqttPrinter:
                 time.sleep(5)
         return False
 
-    def printWebImage(self, url):
-        response = requests.get(url)
-        img = Image.open(BytesIO(response.content))
-        img = img.rotate(180)
-        print(img)
-        # img = ImageOps.contain(img, (512, 2048))
-        # img.thumbnail((512, 5000), Image.ADAPTIVE)
-        self.printImage(img, img.width, img.height)
-
     def disconnectFromImageServer(self):
         self.socket.close()
 
     def configurePrinterForImage(self, imageWidth, imageHeight):
         payload = {}
-        payload["width"] = 512
+        payload["width"] = imageWidth
         payload["height"] = imageHeight
         payload["density"] = "true"
         payload["status"] = 1
@@ -185,12 +197,12 @@ class MqttPrinter:
         self.client.publish("printer/image", json.dumps(payload))
         self.disconnectFromImageServer()
 
-    def printImage(self, imageData, imageWidth, imageHeight):
+    def printImage(self, imageData):
         image = escposImage.EscposImage(imageData)
         image.auto_rotate()
         image.fit_width(512)
         image.center(512)
-        self.configurePrinterForImage(imageWidth, imageHeight)
+        self.configurePrinterForImage(image.width, image.height)
         time.sleep(1)
         if self.connectToImageServer():
             i = 0
@@ -274,6 +286,7 @@ class MqttPrinter:
         self.current_line = ""
         self.autoCut = True
         self.promptsQueue = queue.Queue()
+        self.imageQueue = queue.Queue()
         self.newPrompt = threading.Condition()
         self.line_length = self.config.PRINTER_CONFIGURATION["line_length"]
 

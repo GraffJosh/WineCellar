@@ -40,7 +40,7 @@ class CameraPrinter:
         image = self.camera.getNewImage()
         self.camera.frameHeight
         self.camera.frameWidth
-        if not self.printer.printImage(image, self.camera.frameWidth, self.camera.frameHeight):
+        if not self.printer.printImage(image):
             self.status = "faulted"
         else:
             self.status = "ready"
