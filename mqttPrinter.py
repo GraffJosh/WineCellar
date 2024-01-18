@@ -158,7 +158,12 @@ class MqttPrinter:
 
     def getWebImage(self, url):
         print("URL: ", '"', url.strip(), '"')
-        response = requests.get(url.strip())
+        try:
+            response = requests.get(url.strip())
+        except Exception as e: 
+            print("get web image failed for: "+str(e))
+            self.printChunk("\n\n Get web image failed for: "+str(e))
+            return ""
         img = Image.open(BytesIO(response.content))
         img = img.rotate(180)
         return img
@@ -174,7 +179,7 @@ class MqttPrinter:
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.connect((self.printerIPAddress, self.printerIPPort))
                 return True
-            except BaseException as e:
+            except Exception as e:
                 print("connection to ", self.printerIPAddress, " failed for ", e)
                 time.sleep(5)
         return False
@@ -198,23 +203,26 @@ class MqttPrinter:
         self.disconnectFromImageServer()
 
     def printImage(self, imageData):
-        image = escposImage.EscposImage(imageData)
-        image.auto_rotate()
-        image.fit_width(512)
-        image.center(512)
-        self.configurePrinterForImage(image.width, image.height)
-        time.sleep(1)
-        if self.connectToImageServer():
-            i = 0
-            for line in image.to_column_format(True):
-                i = i + 1
-                self.sendImageBytesToServer(line)
-            time.sleep(i / 6)
-            self.printImageComplete()
-            return True
+        if imageData:
+            image = escposImage.EscposImage(imageData)
+            image.auto_rotate()
+            image.fit_width(512)
+            image.center(512)
+            self.configurePrinterForImage(image.width, image.height)
+            time.sleep(.5)
+            if self.connectToImageServer():
+                i = 0
+                for line in image.to_column_format(True):
+                    i = i + 1
+                    self.sendImageBytesToServer(line)
+                time.sleep(i / 6)
+                self.printImageComplete()
+                return True
+            else:
+                self.print("\n\n Printing Image Failed! Probably couldn't get the IP Address? Idk.")
+                return False
         else:
-            self.print("\n\n Printing Image Failed! Probably couldn't get the IP Address? Idk.")
-            return False
+            self.print("\n\n Printing Image Failed! No image data.")
 
     def print(self, inText):
         text = inText
