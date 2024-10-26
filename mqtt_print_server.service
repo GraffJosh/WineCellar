@@ -1,13 +1,12 @@
 [Unit]
 Description=MQTT Printer Service
-After=multi-user.target
+After=network-online.target
 [Service]
 Type=simple
 User=joshgraff
 ExecStartPre=/bin/sleep 10
 WorkingDirectory=/home/joshgraff/dev/WineCellar
-ExecStartPre=-/usr/bin/git pull
-Environment="PYTHONPATH=$PYTHONPATH:/home/dietpi/.local/lib/python3.10/site-packages"
+Environment="PYTHONPATH=$PYTHONPATH:/home/joshgraff/.local/lib/python3.10/site-packages"
 RuntimeMaxSec=2d
 ExecStart=/home/joshgraff/dev/WineCellar/.venv/bin/python3 /home/joshgraff/dev/WineCellar/runMqttPrinterServer.py
 Restart=always
