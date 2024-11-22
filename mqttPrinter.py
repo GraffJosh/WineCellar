@@ -287,7 +287,7 @@ class MqttPrinter:
         self.client.on_disconnect = self.on_disconnect
         self.client.on_message = self.on_message
         self.client.username_pw_set(
-            username=self.keys.mqtt_username, password=self.keys.mqtt_password
+            username=self.keys.USERNAME, password=self.keys.PASSWORD
         )
         self.connect()
         time.sleep(0.1)
