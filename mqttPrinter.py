@@ -258,7 +258,7 @@ class MqttPrinter:
         return self.botStatusText
 
     def connect(self):
-        hosts = ["homeassistant.local", "192.168.1.103", "192.168.1.105", "localhost"]
+        hosts = ["router.local", "192.168.1.1", "localhost"]
         for host in hosts:
             try:
                 self.client.connect(host, 1883, 60)
