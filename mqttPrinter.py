@@ -160,9 +160,9 @@ class MqttPrinter:
         print("URL: ", '"', url.strip(), '"')
         try:
             response = requests.get(url.strip())
-        except Exception as e: 
-            print("get web image failed for: "+str(e))
-            self.printChunk("\n\n Get web image failed for: "+str(e))
+        except Exception as e:
+            print("get web image failed for: " + str(e))
+            self.printChunk("\n\n Get web image failed for: " + str(e))
             return ""
         img = Image.open(BytesIO(response.content))
         img = img.rotate(180)
@@ -209,7 +209,7 @@ class MqttPrinter:
             image.fit_width(512)
             image.center(512)
             self.configurePrinterForImage(image.width, image.height)
-            time.sleep(.5)
+            time.sleep(0.5)
             if self.connectToImageServer():
                 i = 0
                 for line in image.to_column_format(True):
@@ -258,7 +258,7 @@ class MqttPrinter:
         return self.botStatusText
 
     def connect(self):
-        hosts = ["router.local", "192.168.1.1", "localhost"]
+        hosts = self.config.SERVERS  # ["router.local", "192.168.1.1", "localhost"]
         for host in hosts:
             try:
                 self.client.connect(host, 1883, 60)
@@ -286,9 +286,7 @@ class MqttPrinter:
         self.client.on_connect = self.on_connect
         self.client.on_disconnect = self.on_disconnect
         self.client.on_message = self.on_message
-        self.client.username_pw_set(
-            username=self.keys.USERNAME, password=self.keys.PASSWORD
-        )
+        self.client.username_pw_set(username=self.keys.USERNAME, password=self.keys.PASSWORD)
         self.connect()
         time.sleep(0.1)
         self.current_line = ""
